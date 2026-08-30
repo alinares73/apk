@@ -257,6 +257,7 @@
 
     let touchStartX = 0;
     let touchEndX = 0;
+    let swipingActive = false;
 
     async function cargarDatos() {
       const datosCache = localStorage.getItem("comedor_cache_rows");
@@ -335,7 +336,6 @@
       construirSelectorSemana();
     }
 
-    // NUEVA FUNCIÓN: Cambiar de día uno a uno con flechas o gestos
     function cambiarDiaIndividual(dir) {
       if (!fechaIsoSeleccionada) return;
       const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
@@ -351,23 +351,29 @@
       
       semanaBox.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
+        swipingActive = false;
       }, { passive: true });
 
-      semanaBox.addEventListener('touchend', (e) => {
+      semanaBox.addEventListener('touchmove', (e) => {
+        if (swipingActive) return;
+        
         touchEndX = e.changedTouches[0].screenX;
-        manejarGestoSwipe();
+        const diferencia = touchStartX - touchEndX;
+        const umbralMinimo = 50;
+        
+        if (Math.abs(diferencia) > umbralMinimo) {
+          if (diferencia > 0) {
+            cambiarDiaIndividual(1);
+          } else {
+            cambiarDiaIndividual(-1);
+          }
+          swipingActive = true;
+        }
       }, { passive: true });
-    }
 
-    function manejarGestoSwipe() {
-      const diferencia = touchStartX - touchEndX;
-      const umbralMinimo = 45;
-      
-      if (diferencia > umbralMinimo) {
-        cambiarDiaIndividual(1); // Deslizar izquierda avanza 1 día
-      } else if (diferencia < -umbralMinimo) {
-        cambiarDiaIndividual(-1); // Deslizar derecha retrocede 1 día
-      }
+      semanaBox.addEventListener('touchend', () => {
+        swipingActive = false;
+      }, { passive: true });
     }
 
     function construirSelectorSemana() {
@@ -864,7 +870,7 @@
 
       let cambiosPorPersona = {};
       keys.forEach(k => {
-        const [person, fecha, meal]  = k.split('|');
+        const [person, fecha, meal] = k.split('|');
         if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
         cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
       });
