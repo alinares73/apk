@@ -247,7 +247,7 @@
     let servicioModal = "";
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
-    let carruselInicializado = false;
+    let carruselConstruido = false;
 
     let ausenciaAnio = 2026;
     let ausenciaMes = 7; 
@@ -270,9 +270,9 @@
           fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
         }
         inicializarSelectUsuarios();
-        if (!carruselInicializado) {
+        if (!carruselConstruido) {
           construirCarruselCompleto();
-          carruselInicializado = true;
+          carruselConstruido = true;
         }
         actualizarEstadoVisualCarrusel();
         renderizarVista();
@@ -293,9 +293,9 @@
             fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
           }
           inicializarSelectUsuarios();
-          if (!carruselInicializado) {
+          if (!carruselConstruido) {
             construirCarruselCompleto();
-            carruselInicializado = true;
+            carruselConstruido = true;
           }
           actualizarEstadoVisualCarrusel();
           renderizarVista();
@@ -307,9 +307,9 @@
 
     function irAlDiaHoy() {
       const hoy = new Date();
-      const isoHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-      cambiarFecha(isoHoy);
-      centrarCarruselEnDiaSeleccionado(true); // Al pulsar "Hoy" sí centramos explícitamente
+      fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+      construirCarruselCompleto(); // Al pulsar Hoy, reconstruimos estrictamente la semana actual de L-D centrada en hoy
+      renderizarVista();
     }
 
     function inicializarSelectUsuarios() {
@@ -327,24 +327,40 @@
       actualizarTituloAusencias();
     }
 
-    function construirCarruselCompleto() {
+    // CONSTRUCTOR INTELIGENTE: Si se abren flechas o inicio, ordena de lunes a domingo. Si se desliza, respeta el carrusel libre.
+    function construirCarruselCompleto(forzarLunesDomingo = true) {
       const container = document.getElementById("semana-container");
       const nombresDiasL = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       let html = '';
 
-      const anioActual = 2026;
-      const fechaIteracion = new Date(anioActual, 6, 1); 
-      
+      let fechaBase;
+      if (forzarLunesDomingo && fechaIsoSeleccionada) {
+        const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
+        const selDate = new Date(y, m - 1, d);
+        let dayOfWeek = selDate.getDay(); // 0 es domingo
+        let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        fechaBase = new Date(selDate);
+        fechaBase.setDate(selDate.getDate() + diffToMonday); // Calculamos estrictamente el lunes de esta semana
+      } else {
+        const anioActual = 2026;
+        fechaBase = new Date(anioActual, 6, 1); 
+      }
+
+      // Pintamos un rango amplio de 120 días para permitir desplazamiento fluido, pero arrancando ordenado si se piden flechas/hoy
       for (let i = 0; i < 120; i++) {
-        const d = new Date(fechaIteracion);
-        d.setDate(fechaIteracion.getDate() + i);
+        const d = new Date(fechaBase);
+        if (!forzarLunesDomingo) {
+          d.setDate(fechaBase.getDate() + i);
+        } else {
+          d.setDate(fechaBase.getDate() + i);
+        }
+        
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
         let jsDay = d.getDay(); 
         let indexL = jsDay === 0 ? 6 : jsDay - 1; 
         let letraDia = nombresDiasL[indexL];
 
-        // Tarjetas con ancho reducido (w-9 sm:w-10) para que entren exactamente los 7 días en pantalla
         html += `
           <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item flex-shrink-0 w-9 sm:w-10 md:w-12 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
             <div class="text-[9px] md:text-xs font-bold opacity-70">${letraDia}</div>
@@ -360,11 +376,13 @@
       if (!fechaIsoSeleccionada) return;
       const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
       const dateObj = new Date(y, m - 1, d);
-      dateObj.setDate(dateObj.getDate() + (dir * 7));
+      dateObj.setDate(dateObj.getDate() + (dir * 7)); // Salto exacto de una semana
       
-      const nuevoIso = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-      cambiarFecha(nuevoIso);
-      centrarCarruselEnDiaSeleccionado(true); // Al pulsar flechas de semana sí centramos para mostrar el bloque
+      fechaIsoSeleccionada = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+      
+      // Al pulsar las flechas, recuperamos obligatoriamente la estructura ordenada de Lunes a Domingo
+      construirCarruselCompleto(true);
+      renderizarVista();
     }
 
     function actualizarEstadoVisualCarrusel() {
@@ -398,8 +416,7 @@
     function cambiarFecha(iso) {
       fechaIsoSeleccionada = iso;
       actualizarEstadoVisualCarrusel();
-      // NOTA: Se elimina el centrado automático al pulsar un día individual, 
-      // para que el carrusel se quede libre donde lo dejó el usuario.
+      // Al pulsar un día de forma táctil individual, el carrusel se queda completamente quieto (no se mueve)
       renderizarVista();
     }
 
