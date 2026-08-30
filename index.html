@@ -41,9 +41,9 @@
     <!-- Selector Semanal de Lun a Dom -->
     <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none">
       <div class="flex items-center justify-between mb-2">
-        <button onclick="cambiarSemana(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
+        <button onclick="cambiarDiaIndividual(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
         <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">AGOSTO DE 2026</span>
-        <button onclick="cambiarSemana(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
+        <button onclick="cambiarDiaIndividual(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
       <div class="grid grid-cols-7 gap-1.5 text-center transition-transform duration-200" id="semana-container"></div>
     </div>
@@ -335,9 +335,15 @@
       construirSelectorSemana();
     }
 
-    function cambiarSemana(dir) {
-      lunesPivoteSemana.setDate(lunesPivoteSemana.getDate() + (dir * 7));
-      construirSelectorSemana();
+    // NUEVA FUNCIÓN: Cambiar de día uno a uno con flechas o gestos
+    function cambiarDiaIndividual(dir) {
+      if (!fechaIsoSeleccionada) return;
+      const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      dateObj.setDate(dateObj.getDate() + dir);
+      
+      const nuevoIso = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+      cambiarFecha(nuevoIso);
     }
 
     function inicializarEventosTactiles() {
@@ -358,9 +364,9 @@
       const umbralMinimo = 45;
       
       if (diferencia > umbralMinimo) {
-        cambiarSemana(1);
+        cambiarDiaIndividual(1); // Deslizar izquierda avanza 1 día
       } else if (diferencia < -umbralMinimo) {
-        cambiarSemana(-1);
+        cambiarDiaIndividual(-1); // Deslizar derecha retrocede 1 día
       }
     }
 
@@ -858,7 +864,7 @@
 
       let cambiosPorPersona = {};
       keys.forEach(k => {
-        const [person, fecha, meal] = k.split('|');
+        const [person, fecha, meal]  = k.split('|');
         if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
         cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
       });
