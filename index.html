@@ -21,7 +21,7 @@
     /* Ocultar barra de desplazamiento manteniendo inercia táctil fluida */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    #semana-container { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+    #semana-container { -webkit-overflow-scrolling: touch; }
   </style>
 </head>
 <body class="text-[#2B2B2B] p-4 sm:p-6 md:p-8 max-w-md md:max-w-xl lg:max-w-3xl mx-auto pb-24 select-none">
@@ -42,12 +42,12 @@
     <!-- Selector Carrusel Deslizable de Días -->
     <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none">
       <div class="flex items-center justify-between mb-2">
-        <button onclick="cambiarDiaIndividual(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
+        <button onclick="cambiarSemanaFlecha(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
         <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">AGOSTO DE 2026</span>
-        <button onclick="cambiarDiaIndividual(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
+        <button onclick="cambiarSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
-      <!-- Carrusel horizontal táctil fluido libre -->
-      <div class="flex space-x-2.5 overflow-x-auto no-scrollbar py-2 px-1" id="semana-container"></div>
+      <!-- Carrusel horizontal adaptado para que quepan 7 días visibles en pantalla -->
+      <div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-2 px-1 justify-between sm:justify-start" id="semana-container"></div>
     </div>
 
     <!-- Cabecera Fecha y Usuario -->
@@ -309,6 +309,7 @@
       const hoy = new Date();
       const isoHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
       cambiarFecha(isoHoy);
+      centrarCarruselEnDiaSeleccionado(true); // Al pulsar "Hoy" sí centramos explícitamente
     }
 
     function inicializarSelectUsuarios() {
@@ -326,15 +327,13 @@
       actualizarTituloAusencias();
     }
 
-    // CONSTRUCTOR DEL CARRUSEL: Pinta un rango continuo de días para que hagas scroll libremente
     function construirCarruselCompleto() {
       const container = document.getElementById("semana-container");
       const nombresDiasL = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       let html = '';
 
-      // Tomamos como referencia el año actual y generamos desde el 1 de julio hasta el 31 de diciembre (o un rango amplio de 4 meses)
       const anioActual = 2026;
-      const fechaIteracion = new Date(anioActual, 6, 1); // 1 de Julio de 2026 como base ajustable
+      const fechaIteracion = new Date(anioActual, 6, 1); 
       
       for (let i = 0; i < 120; i++) {
         const d = new Date(fechaIteracion);
@@ -345,10 +344,11 @@
         let indexL = jsDay === 0 ? 6 : jsDay - 1; 
         let letraDia = nombresDiasL[indexL];
 
+        // Tarjetas con ancho reducido (w-9 sm:w-10) para que entren exactamente los 7 días en pantalla
         html += `
-          <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item flex-shrink-0 w-12 md:w-14 text-center cursor-pointer p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
-            <div class="text-[10px] md:text-xs font-bold opacity-70">${letraDia}</div>
-            <div class="text-base md:text-lg font-extrabold mt-0.5">${d.getDate()}</div>
+          <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item flex-shrink-0 w-9 sm:w-10 md:w-12 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
+            <div class="text-[9px] md:text-xs font-bold opacity-70">${letraDia}</div>
+            <div class="text-sm md:text-base font-extrabold mt-0.5">${d.getDate()}</div>
           </div>
         `;
       }
@@ -356,26 +356,26 @@
       centrarCarruselEnDiaSeleccionado(false);
     }
 
-    function cambiarDiaIndividual(dir) {
+    function cambiarSemanaFlecha(dir) {
       if (!fechaIsoSeleccionada) return;
       const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
       const dateObj = new Date(y, m - 1, d);
-      dateObj.setDate(dateObj.getDate() + dir);
+      dateObj.setDate(dateObj.getDate() + (dir * 7));
       
       const nuevoIso = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
       cambiarFecha(nuevoIso);
+      centrarCarruselEnDiaSeleccionado(true); // Al pulsar flechas de semana sí centramos para mostrar el bloque
     }
 
     function actualizarEstadoVisualCarrusel() {
-      // Quitamos la clase activa a todas las tarjetas y se la ponemos solo a la seleccionada
       const tarjetas = document.querySelectorAll('.day-card-item');
       tarjetas.forEach(t => {
-        t.className = "day-card-item flex-shrink-0 w-12 md:w-14 text-center cursor-pointer p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100";
+        t.className = "day-card-item flex-shrink-0 w-9 sm:w-10 md:w-12 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100";
       });
 
       const tarjetaActiva = document.getElementById(`day-card-${fechaIsoSeleccionada}`);
       if (tarjetaActiva) {
-        tarjetaActiva.className = "day-card-item flex-shrink-0 w-12 md:w-14 text-center cursor-pointer p-2 rounded-xl transition-all bg-forest text-white shadow-sm scale-105";
+        tarjetaActiva.className = "day-card-item flex-shrink-0 w-9 sm:w-10 md:w-12 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all bg-forest text-white shadow-sm scale-105";
       }
 
       const [sy, sm, sd] = fechaIsoSeleccionada.split('-').map(Number);
@@ -398,7 +398,8 @@
     function cambiarFecha(iso) {
       fechaIsoSeleccionada = iso;
       actualizarEstadoVisualCarrusel();
-      centrarCarruselEnDiaSeleccionado(true);
+      // NOTA: Se elimina el centrado automático al pulsar un día individual, 
+      // para que el carrusel se quede libre donde lo dejó el usuario.
       renderizarVista();
     }
 
