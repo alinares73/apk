@@ -23,131 +23,131 @@
     #semana-box { touch-action: pan-y; }
   </style>
 </head>
-<body class="text-[#2B2B2B] p-4 max-w-md mx-auto pb-20 select-none">
+<body class="text-[#2B2B2B] p-4 sm:p-6 md:p-8 max-w-md md:max-w-xl lg:max-w-3xl mx-auto pb-24 select-none">
 
   <!-- ================= PANTALLA PRINCIPAL MAIN ================= -->
   <div id="pantalla-principal">
     
     <!-- Cabecera principal -->
-    <header class="flex justify-between items-center pt-2 pb-2">
-      <h1 class="text-3xl font-extrabold leading-tight text-gray-900">Comedor<br>Ciudadela</h1>
+    <header class="flex justify-between items-center pt-2 pb-3">
+      <h1 class="text-3xl md:text-4xl font-extrabold leading-tight text-gray-900">Comedor<br>Ciudadela</h1>
       <div>
-        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0] hover:bg-[#F2D1CE] text-[#8C4340] font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-sm active:scale-95 transition-all tracking-wider uppercase">
+        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0] hover:bg-[#F2D1CE] text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-all tracking-wider uppercase">
           HOY
         </button>
       </div>
     </header>
 
     <!-- Selector Semanal de Lun a Dom -->
-    <div id="semana-box" class="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100 mb-3 select-none">
-      <div class="flex items-center justify-between mb-1">
-        <button onclick="cambiarSemana(-1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-base active:scale-95 transition-all">&lsaquo;</button>
-        <span id="mes-anio-label" class="text-xs font-extrabold uppercase tracking-wider text-gray-600 transition-all">AGOSTO DE 2026</span>
-        <button onclick="cambiarSemana(1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-base active:scale-95 transition-all">&rsaquo;</button>
+    <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none">
+      <div class="flex items-center justify-between mb-2">
+        <button onclick="cambiarSemana(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
+        <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">AGOSTO DE 2026</span>
+        <button onclick="cambiarSemana(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center transition-transform duration-200" id="semana-container"></div>
+      <div class="grid grid-cols-7 gap-1.5 text-center transition-transform duration-200" id="semana-container"></div>
     </div>
 
     <!-- Cabecera Fecha y Usuario -->
-    <div class="flex justify-between items-center my-3">
-      <div class="flex items-center space-x-3">
-        <span class="text-5xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
+    <div class="flex justify-between items-center my-4">
+      <div class="flex items-center space-x-3 md:space-x-4">
+        <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
         <div class="flex flex-col justify-between py-0.5 leading-tight">
-          <span id="dia-txt" class="text-sm font-extrabold text-gray-400 uppercase tracking-wide">---</span>
-          <span id="mes-txt" class="text-base font-extrabold text-gray-900 uppercase tracking-tight">---</span>
+          <span id="dia-txt" class="text-xs md:text-sm font-extrabold text-gray-400 uppercase tracking-wide">---</span>
+          <span id="mes-txt" class="text-base md:text-lg font-extrabold text-gray-900 uppercase tracking-tight">---</span>
         </div>
       </div>
       <div class="text-right">
-        <span class="text-[10px] tracking-widest font-bold text-gray-400 block uppercase">Iniciales</span>
-        <select id="user-select" onchange="renderizarVista()" class="font-extrabold text-lg text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
+        <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 block uppercase">Iniciales</span>
+        <select id="user-select" onchange="renderizarVista()" class="font-extrabold text-lg md:text-xl text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
         </select>
       </div>
     </div>
 
     <!-- Tú este día -->
-    <div class="mt-3">
-      <h2 class="text-[11px] font-bold tracking-wider text-gray-500 uppercase mb-2">Tú este día (Pulsa para cambiar)</h2>
-      <div class="grid grid-cols-3 gap-2">
-        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs opacity-85 block mb-1">☼ Desay.</span>
-          <span class="text-xl font-bold" id="tu-desayuno">--</span>
+    <div class="mt-4">
+      <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Tú este día (Pulsa para cambiar)</h2>
+      <div class="grid grid-cols-3 gap-2.5">
+        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
+          <span class="text-xs md:text-sm opacity-85 block mb-1">☼ Desay.</span>
+          <span class="text-xl md:text-2xl font-bold" id="tu-desayuno">--</span>
         </div>
-        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs opacity-85 block mb-1">&#x1F374; Alm.</span>
-          <span class="text-xl font-bold" id="tu-almuerzo">--</span>
+        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
+          <span class="text-xs md:text-sm opacity-85 block mb-1">&#x1F374; Alm.</span>
+          <span class="text-xl md:text-2xl font-bold" id="tu-almuerzo">--</span>
         </div>
-        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs opacity-85 block mb-1">&#x263E; Cena</span>
-          <span class="text-xl font-bold" id="tu-cena">--</span>
+        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
+          <span class="text-xs md:text-sm opacity-85 block mb-1">&#x263E; Cena</span>
+          <span class="text-xl md:text-2xl font-bold" id="tu-cena">--</span>
         </div>
       </div>
     </div>
 
     <!-- BOTÓN DE GUARDAR CAMBIOS -->
-    <div id="contenedor-btn-guardar-sup" class="hidden mt-3">
-      <button onclick="guardarCambiosPendientes()" class="w-full bg-forest text-white font-bold py-3 px-4 rounded-xl flex items-center justify-between text-sm shadow-md active:scale-95 transition-transform animate-pulse">
+    <div id="contenedor-btn-guardar-sup" class="hidden mt-4">
+      <button onclick="guardarCambiosPendientes()" class="w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse">
         <div class="flex items-center space-x-2">
           <span>💾</span>
           <span id="btn-guardar-txt-sup">Guardar cambios (0 pendientes)</span>
         </div>
-        <span id="sync-status" class="text-[11px] text-white/70 font-medium tracking-tight">Pendiente</span>
+        <span id="sync-status" class="text-xs text-white/70 font-medium tracking-tight">Pendiente</span>
       </button>
     </div>
 
     <!-- Resumen de comensales -->
-    <div class="mt-4">
-      <h2 class="text-[11px] font-bold tracking-wider text-gray-500 uppercase mb-2">Resumen de comensales (Pulsa para ver detalle)</h2>
-      <div class="grid grid-cols-3 gap-2">
-        <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-3 shadow-sm border-2 border-forest-light cursor-pointer transition-all">
-          <span class="text-xs text-white/90 block mb-1">☼ Desay.</span>
-          <span class="text-2xl font-extrabold text-white" id="tot-desayuno">0</span>
+    <div class="mt-5">
+      <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Resumen de comensales (Pulsa para ver detalle)</h2>
+      <div class="grid grid-cols-3 gap-2.5">
+        <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-forest-light cursor-pointer transition-all">
+          <span class="text-xs md:text-sm text-white/90 block mb-1">☼ Desay.</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-white" id="tot-desayuno">0</span>
         </div>
-        <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-3 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
-          <span class="text-xs text-gray-500 block mb-1">&#x1F374; Alm.</span>
-          <span class="text-2xl font-extrabold text-gray-900" id="tot-almuerzo">0</span>
+        <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
+          <span class="text-xs md:text-sm text-gray-500 block mb-1">&#x1F374; Alm.</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-gray-900" id="tot-almuerzo">0</span>
         </div>
-        <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-3 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
-          <span class="text-xs text-gray-500 block mb-1">&#x263E; Cena</span>
-          <span class="text-2xl font-extrabold text-gray-900" id="tot-cena">0</span>
+        <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
+          <span class="text-xs md:text-sm text-gray-500 block mb-1">&#x263E; Cena</span>
+          <span class="text-2xl md:text-3xl font-extrabold text-gray-900" id="tot-cena">0</span>
         </div>
       </div>
     </div>
 
     <!-- Desglose: Comen -->
-    <div class="mt-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div class="mt-5 bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100">
       <div class="flex justify-between items-center mb-3">
-        <span class="text-[11px] font-extrabold tracking-wider text-gray-500 uppercase" id="titulo-seccion-comen">COMEN · DESAYUNO</span>
-        <span id="count-comen" class="bg-forest text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+        <span class="text-[11px] md:text-xs font-extrabold tracking-wider text-gray-500 uppercase" id="titulo-seccion-comen">COMEN · DESAYUNO</span>
+        <span id="count-comen" class="bg-forest text-white text-xs md:text-sm font-bold w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center">0</span>
       </div>
       <div class="flex flex-wrap gap-2" id="list-comen"></div>
     </div>
 
     <!-- Desglose: No vienen -->
-    <div class="mt-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div class="mt-4 bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100">
       <div class="flex justify-between items-center mb-3">
-        <span class="text-[11px] font-extrabold tracking-wider text-gray-500 uppercase" id="titulo-seccion-no">NO VIENEN · DESAYUNO</span>
-        <span id="count-no" class="bg-[#EAC8C6] text-[#8C4340] text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+        <span class="text-[11px] md:text-xs font-extrabold tracking-wider text-gray-500 uppercase" id="titulo-seccion-no">NO VIENEN · DESAYUNO</span>
+        <span id="count-no" class="bg-[#EAC8C6] text-[#8C4340] text-xs md:text-sm font-bold w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center">0</span>
       </div>
       <div class="flex flex-wrap gap-2" id="list-no"></div>
     </div>
 
     <!-- Desglose: Tarde / Temp / Bolsa -->
-    <div id="seccion-especial" class="mt-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hidden">
+    <div id="seccion-especial" class="mt-4 bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-100 hidden">
       <div class="flex justify-between items-center mb-3">
-        <span class="text-[11px] font-extrabold tracking-wider text-amber-800 uppercase" id="titulo-seccion-esp">TARDE / TEMP / BOLSA · DESAYUNO</span>
-        <span id="count-esp" class="bg-amber-100 text-amber-800 text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+        <span class="text-[11px] md:text-xs font-extrabold tracking-wider text-amber-800 uppercase" id="titulo-seccion-esp">TARDE / TEMP / BOLSA · DESAYUNO</span>
+        <span id="count-esp" class="bg-amber-100 text-amber-800 text-xs md:text-sm font-bold w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center">0</span>
       </div>
       <div class="flex flex-wrap gap-2" id="list-esp"></div>
     </div>
 
     <!-- Observaciones / Nota del día -->
-    <div id="contenedor-nota" class="hidden mt-3 bg-[#EDE5CD] text-[#7A6031] font-semibold text-sm px-4 py-3 rounded-xl shadow-sm">
+    <div id="contenedor-nota" class="hidden mt-4 bg-[#EDE5CD] text-[#7A6031] font-semibold text-sm md:text-base px-4 py-3.5 rounded-xl shadow-sm">
       <div id="texto-nota" class="space-y-1"></div>
     </div>
 
     <!-- BOTÓN AÑADIR AUSENCIAS -->
     <div class="mt-6">
-      <button onclick="abrirPantallaAusencias()" class="w-full bg-forest text-white font-extrabold py-4 rounded-full flex items-center justify-center space-x-2 text-sm shadow-lg active:scale-95 transition-transform">
+      <button onclick="abrirPantallaAusencias()" class="w-full bg-forest text-white font-extrabold py-4 md:py-4.5 rounded-full flex items-center justify-center space-x-2 text-sm md:text-base shadow-lg active:scale-95 transition-transform">
         <span>📅</span>
         <span>Añadir ausencias</span>
       </button>
@@ -160,60 +160,60 @@
     <div class="flex items-center justify-between pt-2 pb-4 border-b border-gray-200 mb-4">
       <div class="flex items-center space-x-3">
         <button onclick="cerrarPantallaAusencias()" class="text-2xl font-bold text-gray-800">&times;</button>
-        <h1 class="text-xl font-extrabold text-gray-900" id="titulo-pantalla-ausencias">Ausencias de ALR</h1>
+        <h1 class="text-xl md:text-2xl font-extrabold text-gray-900" id="titulo-pantalla-ausencias">Ausencias de ALR</h1>
       </div>
     </div>
 
     <div class="mb-4">
-      <label class="text-[11px] font-extrabold tracking-wider text-gray-400 block uppercase mb-1">Quién</label>
-      <select id="ausencia-user-select" onchange="actualizarTituloAusencias()" class="w-full bg-white border border-gray-200 font-extrabold text-lg text-gray-900 p-3 rounded-2xl outline-none cursor-pointer shadow-sm">
+      <label class="text-[11px] md:text-xs font-extrabold tracking-wider text-gray-400 block uppercase mb-1">Quién</label>
+      <select id="ausencia-user-select" onchange="actualizarTituloAusencias()" class="w-full bg-white border border-gray-200 font-extrabold text-lg md:text-xl text-gray-900 p-3.5 rounded-2xl outline-none cursor-pointer shadow-sm">
       </select>
     </div>
 
     <!-- Ficha INICIO -->
-    <div onclick="seleccionarFocoAusencia('inicio')" id="card-ausencia-inicio" class="bg-white border-2 rounded-2xl p-4 mb-3 shadow-sm cursor-pointer transition-all">
+    <div onclick="seleccionarFocoAusencia('inicio')" id="card-ausencia-inicio" class="bg-white border-2 rounded-2xl p-4 md:p-5 mb-3 shadow-sm cursor-pointer transition-all">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-[10px] tracking-widest font-extrabold text-gray-400 uppercase">INICIO</span>
-        <span id="badge-foco-inicio" class="text-[10px] font-bold text-[#264334] bg-[#DDEEE6] px-2 py-0.5 rounded-full">Seleccionando</span>
+        <span class="text-[10px] md:text-xs tracking-widest font-extrabold text-gray-400 uppercase">INICIO</span>
+        <span id="badge-foco-inicio" class="text-[10px] md:text-xs font-bold text-[#264334] bg-[#DDEEE6] px-2.5 py-0.5 rounded-full">Seleccionando</span>
       </div>
-      <div class="text-lg font-extrabold text-gray-900 mb-3" id="ausencia-inicio-txt">Elige un día</div>
-      <div class="grid grid-cols-3 gap-2" onclick="event.stopPropagation()">
-        <button onclick="setMealInicio('desayuno')" id="btn-ini-desayuno" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Des</button>
-        <button onclick="setMealInicio('almuerzo')" id="btn-ini-almuerzo" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Alm</button>
-        <button onclick="setMealInicio('cena')" id="btn-ini-cena" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Cen</button>
+      <div class="text-lg md:text-xl font-extrabold text-gray-900 mb-3" id="ausencia-inicio-txt">Elige un día</div>
+      <div class="grid grid-cols-3 gap-2.5" onclick="event.stopPropagation()">
+        <button onclick="setMealInicio('desayuno')" id="btn-ini-desayuno" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Des</button>
+        <button onclick="setMealInicio('almuerzo')" id="btn-ini-almuerzo" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Alm</button>
+        <button onclick="setMealInicio('cena')" id="btn-ini-cena" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Cen</button>
       </div>
     </div>
 
     <!-- Ficha FINAL -->
-    <div onclick="seleccionarFocoAusencia('final')" id="card-ausencia-final" class="bg-white border-2 rounded-2xl p-4 mb-4 shadow-sm cursor-pointer transition-all">
+    <div onclick="seleccionarFocoAusencia('final')" id="card-ausencia-final" class="bg-white border-2 rounded-2xl p-4 md:p-5 mb-4 shadow-sm cursor-pointer transition-all">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-[10px] tracking-widest font-extrabold text-gray-400 uppercase">FINAL</span>
-        <span id="badge-foco-final" class="hidden text-[10px] font-bold text-[#264334] bg-[#DDEEE6] px-2 py-0.5 rounded-full">Seleccionando</span>
+        <span class="text-[10px] md:text-xs tracking-widest font-extrabold text-gray-400 uppercase">FINAL</span>
+        <span id="badge-foco-final" class="hidden text-[10px] md:text-xs font-bold text-[#264334] bg-[#DDEEE6] px-2.5 py-0.5 rounded-full">Seleccionando</span>
       </div>
-      <div class="text-lg font-extrabold text-gray-900 mb-3" id="ausencia-final-txt">Elige un día</div>
-      <div class="grid grid-cols-3 gap-2" onclick="event.stopPropagation()">
-        <button onclick="setMealFinal('desayuno')" id="btn-fin-desayuno" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Des</button>
-        <button onclick="setMealFinal('almuerzo')" id="btn-fin-almuerzo" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Alm</button>
-        <button onclick="setMealFinal('cena')" id="btn-fin-cena" class="py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all">Cen</button>
+      <div class="text-lg md:text-xl font-extrabold text-gray-900 mb-3" id="ausencia-final-txt">Elige un día</div>
+      <div class="grid grid-cols-3 gap-2.5" onclick="event.stopPropagation()">
+        <button onclick="setMealFinal('desayuno')" id="btn-fin-desayuno" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Des</button>
+        <button onclick="setMealFinal('almuerzo')" id="btn-fin-almuerzo" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Alm</button>
+        <button onclick="setMealFinal('cena')" id="btn-fin-cena" class="py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all">Cen</button>
       </div>
     </div>
 
     <!-- Calendario Mensual -->
-    <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm mb-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 shadow-sm mb-6">
       <div class="flex items-center justify-between mb-4">
-        <button onclick="cambiarMesCalendario(-1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&lsaquo;</button>
-        <span id="cal-mes-anio-label" class="text-sm font-extrabold uppercase text-gray-800">AGOSTO DE 2026</span>
-        <button onclick="cambiarMesCalendario(1)" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&rsaquo;</button>
+        <button onclick="cambiarMesCalendario(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&lsaquo;</button>
+        <span id="cal-mes-anio-label" class="text-sm md:text-base font-extrabold uppercase text-gray-800">AGOSTO DE 2026</span>
+        <button onclick="cambiarMesCalendario(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&rsaquo;</button>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400 mb-2">
+      <div class="grid grid-cols-7 gap-1.5 text-center text-xs md:text-sm font-bold text-gray-400 mb-2">
         <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center text-sm font-bold" id="cal-dias-grid"></div>
+      <div class="grid grid-cols-7 gap-1.5 text-center text-sm md:text-base font-bold" id="cal-dias-grid"></div>
     </div>
 
     <!-- Botón Inferior Guardar Ausencias -->
     <div class="mb-10">
-      <button onclick="ejecutarGuardarAusenciasRango()" id="btn-guardar-ausencias-rango" class="w-full bg-[#E8E6DF] text-gray-800 font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm shadow-md active:scale-95 transition-all">
+      <button onclick="ejecutarGuardarAusenciasRango()" id="btn-guardar-ausencias-rango" class="w-full bg-[#E8E6DF] text-gray-800 font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm md:text-base shadow-md active:scale-95 transition-all">
         <span id="btn-guardar-rango-icono">💾 Guardar ausencias</span>
         <span id="btn-guardar-rango-sub" class="text-[11px] font-semibold text-gray-500 hidden mt-0.5">Guardando...</span>
       </button>
@@ -223,16 +223,16 @@
 
   <!-- Modal Estado -->
   <div id="modal-estado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-5 w-full max-w-xs shadow-xl text-center">
-      <h3 id="modal-titulo" class="font-extrabold text-gray-900 text-base mb-4">Seleccionar estado</h3>
-      <div class="grid grid-cols-1 gap-2">
-        <button onclick="asignarEstadoLocal('')" class="bg-gray-100 hover:bg-gray-200 py-2.5 rounded-xl font-bold text-sm">Sí (Asiste)</button>
-        <button onclick="asignarEstadoLocal('no')" class="bg-[#F8E2E0] text-[#8C4340] py-2.5 rounded-xl font-bold text-sm">No</button>
-        <button onclick="asignarEstadoLocal('tarde')" class="bg-amber-100 text-amber-800 py-2.5 rounded-xl font-bold text-sm">Tarde</button>
-        <button onclick="asignarEstadoLocal('temp')" class="bg-blue-100 text-blue-800 py-2.5 rounded-xl font-bold text-sm">Temprano (Temp)</button>
-        <button onclick="asignarEstadoLocal('bolsa')" class="bg-purple-100 text-purple-800 py-2.5 rounded-xl font-bold text-sm">Bolsa</button>
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center">
+      <h3 id="modal-titulo" class="font-extrabold text-gray-900 text-lg mb-4">Seleccionar estado</h3>
+      <div class="grid grid-cols-1 gap-2.5">
+        <button onclick="asignarEstadoLocal('')" class="bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold text-sm md:text-base">Sí (Asiste)</button>
+        <button onclick="asignarEstadoLocal('no')" class="bg-[#F8E2E0] text-[#8C4340] py-3 rounded-xl font-bold text-sm md:text-base">No</button>
+        <button onclick="asignarEstadoLocal('tarde')" class="bg-amber-100 text-amber-800 py-3 rounded-xl font-bold text-sm md:text-base">Tarde</button>
+        <button onclick="asignarEstadoLocal('temp')" class="bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-sm md:text-base">Temprano (Temp)</button>
+        <button onclick="asignarEstadoLocal('bolsa')" class="bg-purple-100 text-purple-800 py-3 rounded-xl font-bold text-sm md:text-base">Bolsa</button>
       </div>
-      <button onclick="cerrarModal()" class="mt-4 text-gray-400 text-xs font-bold uppercase tracking-wider">Cancelar</button>
+      <button onclick="cerrarModal()" class="mt-5 text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider">Cancelar</button>
     </div>
   </div>
 
@@ -259,7 +259,6 @@
     let touchEndX = 0;
 
     async function cargarDatos() {
-      // 1. CARGA INSTANTÁNEA DESDE LA MEMORIA LOCAL DEL MÓVIL (Si existe)
       const datosCache = localStorage.getItem("comedor_cache_rows");
       const headersCache = localStorage.getItem("comedor_cache_headers");
 
@@ -274,10 +273,9 @@
         inicializarSelectUsuarios();
         inicializarSemanaDesdeFecha(fechaIsoSeleccionada);
         inicializarEventosTactiles();
-        renderizarVista(); // ¡La pantalla se dibuja al instante sin esperar a internet!
+        renderizarVista();
       }
 
-      // 2. SINCRONIZACIÓN EN SEGUNDO PLANO CON GOOGLE DRIVE
       try {
         const res = await fetch(SCRIPT_URL + "?mode=getData");
         const json = await res.json();
@@ -285,7 +283,6 @@
           headersSheet = json.headers;
           rowsSheet = json.rows;
 
-          // Guardamos en la memoria local del móvil para la próxima vez
           localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
           localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
 
@@ -394,9 +391,9 @@
         const activo = iso === fechaIsoSeleccionada;
 
         html += `
-          <div onclick="cambiarFecha('${iso}')" class="cursor-pointer p-1.5 rounded-xl transition-all ${activo ? 'bg-forest text-white shadow-sm' : 'hover:bg-gray-100 text-gray-700'}">
-            <div class="text-[10px] font-bold opacity-70">${nombresDias[i]}</div>
-            <div class="text-sm font-extrabold mt-0.5">${d.getDate()}</div>
+          <div onclick="cambiarFecha('${iso}')" class="cursor-pointer p-2 rounded-xl transition-all ${activo ? 'bg-forest text-white shadow-sm' : 'hover:bg-gray-100 text-gray-700'}">
+            <div class="text-[10px] md:text-xs font-bold opacity-70">${nombresDias[i]}</div>
+            <div class="text-sm md:text-base font-extrabold mt-0.5">${d.getDate()}</div>
           </div>
         `;
       }
@@ -420,29 +417,29 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
-      const claseInactiva = "bg-white rounded-2xl p-3 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900";
+      const claseInactiva = "bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900";
       cardDesay.className = claseInactiva;
       cardAlm.className = claseInactiva;
       cardCena.className = claseInactiva;
 
-      cardDesay.querySelector("span:first-child").className = "text-xs text-gray-500 block mb-1";
-      cardDesay.querySelector("span:last-child").className = "text-2xl font-extrabold text-gray-900";
+      cardDesay.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
+      cardDesay.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
 
-      cardAlm.querySelector("span:first-child").className = "text-xs text-gray-500 block mb-1";
-      cardAlm.querySelector("span:last-child").className = "text-2xl font-extrabold text-gray-900";
+      cardAlm.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
+      cardAlm.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
 
-      cardCena.querySelector("span:first-child").className = "text-xs text-gray-500 block mb-1";
-      cardCena.querySelector("span:last-child").className = "text-2xl font-extrabold text-gray-900";
+      cardCena.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
+      cardCena.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
 
-      const claseActiva = "bg-forest-light text-white rounded-2xl p-3 shadow-sm border-2 border-forest-light cursor-pointer transition-all";
+      const claseActiva = "bg-forest-light text-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-forest-light cursor-pointer transition-all";
 
       let cardActiva = cardDesay;
       if (servicioDetalleActivo === 'almuerzo') cardActiva = cardAlm;
       if (servicioDetalleActivo === 'cena') cardActiva = cardCena;
 
       cardActiva.className = claseActiva;
-      cardActiva.querySelector("span:first-child").className = "text-xs text-white/90 block mb-1";
-      cardActiva.querySelector("span:last-child").className = "text-2xl font-extrabold text-white";
+      cardActiva.querySelector("span:first-child").className = "text-xs md:text-sm text-white/90 block mb-1";
+      cardActiva.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-white";
     }
 
     function renderizarVista() {
@@ -554,13 +551,13 @@
       document.getElementById("count-esp").textContent = listEsp.length;
       document.getElementById("count-no").textContent = listNo.length;
 
-      document.getElementById("list-comen").innerHTML = listSi.map(i => `<span class="badge-present text-xs font-bold px-3 py-1.5 rounded-full">${i}</span>`).join("");
-      document.getElementById("list-no").innerHTML = listNo.map(i => `<span class="badge-absent text-xs font-bold px-3 py-1.5 rounded-full">${i}</span>`).join("");
+      document.getElementById("list-comen").innerHTML = listSi.map(i => `<span class="badge-present text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-full">${i}</span>`).join("");
+      document.getElementById("list-no").innerHTML = listNo.map(i => `<span class="badge-absent text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-full">${i}</span>`).join("");
       
       const seccionEspecial = document.getElementById("seccion-especial");
       if (listEsp.length > 0) {
         seccionEspecial.classList.remove("hidden");
-        document.getElementById("list-esp").innerHTML = listEsp.map(i => `<span class="badge-special text-xs font-bold px-3 py-1.5 rounded-full">${i}</span>`).join("");
+        document.getElementById("list-esp").innerHTML = listEsp.map(i => `<span class="badge-special text-xs md:text-sm font-bold px-3.5 py-1.5 rounded-full">${i}</span>`).join("");
       } else {
         seccionEspecial.classList.add("hidden");
       }
@@ -696,25 +693,25 @@
       const badgeFin = document.getElementById("badge-foco-final");
 
       if (focoAusencia === "inicio") {
-        cardIni.className = "bg-[#F7FAF8] border-2 border-[#264334] rounded-2xl p-4 mb-3 shadow-md cursor-pointer transition-all";
-        cardFin.className = "bg-white border-2 border-gray-200 rounded-2xl p-4 mb-4 shadow-sm cursor-pointer transition-all opacity-85";
+        cardIni.className = "bg-[#F7FAF8] border-2 border-[#264334] rounded-2xl p-4 md:p-5 mb-3 shadow-md cursor-pointer transition-all";
+        cardFin.className = "bg-white border-2 border-gray-200 rounded-2xl p-4 md:p-5 mb-4 shadow-sm cursor-pointer transition-all opacity-85";
         badgeIni.classList.remove("hidden");
         badgeFin.classList.add("hidden");
       } else {
-        cardIni.className = "bg-white border-2 border-gray-200 rounded-2xl p-4 mb-3 shadow-sm cursor-pointer transition-all opacity-85";
-        cardFin.className = "bg-[#F7FAF8] border-2 border-[#264334] rounded-2xl p-4 mb-4 shadow-md cursor-pointer transition-all";
+        cardIni.className = "bg-white border-2 border-gray-200 rounded-2xl p-4 md:p-5 mb-3 shadow-sm cursor-pointer transition-all opacity-85";
+        cardFin.className = "bg-[#F7FAF8] border-2 border-[#264334] rounded-2xl p-4 md:p-5 mb-4 shadow-md cursor-pointer transition-all";
         badgeIni.classList.add("hidden");
         badgeFin.classList.remove("hidden");
       }
 
       ['desayuno', 'almuerzo', 'cena'].forEach(m => {
         const btn = document.getElementById(`btn-ini-${m}`);
-        btn.className = ausenciaInicioMeal === m ? "py-2.5 rounded-xl font-bold text-xs bg-forest text-white transition-all shadow-sm" : "py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all";
+        btn.className = ausenciaInicioMeal === m ? "py-3 rounded-xl font-bold text-xs md:text-sm bg-forest text-white transition-all shadow-sm" : "py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all";
       });
 
       ['desayuno', 'almuerzo', 'cena'].forEach(m => {
         const btn = document.getElementById(`btn-fin-${m}`);
-        btn.className = ausenciaFinalMeal === m ? "py-2.5 rounded-xl font-bold text-xs bg-forest text-white transition-all shadow-sm" : "py-2.5 rounded-xl font-bold text-xs bg-gray-100 text-gray-700 transition-all";
+        btn.className = ausenciaFinalMeal === m ? "py-3 rounded-xl font-bold text-xs md:text-sm bg-forest text-white transition-all shadow-sm" : "py-3 rounded-xl font-bold text-xs md:text-sm bg-gray-100 text-gray-700 transition-all";
       });
 
       renderizarCalendarioAusencias();
@@ -745,7 +742,7 @@
 
       for (let d = 1; d <= ultimoDiaMes.getDate(); d++) {
         const iso = `${ausenciaAnio}-${String(ausenciaMes + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        let clases = "h-10 flex items-center justify-center rounded-xl cursor-pointer text-sm font-bold transition-all ";
+        let clases = "h-11 md:h-12 flex items-center justify-center rounded-xl cursor-pointer text-sm md:text-base font-bold transition-all ";
         
         const esInicio = iso === ausenciaInicioIso;
         const esFinal = iso === ausenciaFinalIso;
@@ -787,7 +784,7 @@
       const txtIcono = document.getElementById("btn-guardar-rango-icono");
       const txtSub = document.getElementById("btn-guardar-rango-sub");
       btn.disabled = false;
-      btn.className = "w-full bg-[#E8E6DF] hover:bg-[#DEDCD5] text-gray-800 font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm shadow-md active:scale-95 transition-all";
+      btn.className = "w-full bg-[#E8E6DF] hover:bg-[#DEDCD5] text-gray-800 font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm md:text-base shadow-md active:scale-95 transition-all";
       txtIcono.textContent = "💾 Guardar ausencias";
       txtSub.classList.add("hidden");
     }
@@ -834,7 +831,7 @@
         const json = await response.json();
         
         if (json.ok) {
-          btn.className = "w-full bg-[#DDEEE6] text-[#235944] font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm shadow-md transition-all";
+          btn.className = "w-full bg-[#DDEEE6] text-[#235944] font-extrabold py-4 rounded-full flex flex-col items-center justify-center text-sm md:text-base shadow-md transition-all";
           txtIcono.textContent = "✓ Datos guardados";
           txtSub.textContent = "Actualizado correctamente";
 
@@ -884,7 +881,6 @@
           if (!json.ok) throw new Error(json.error || "Error al escribir");
         }
 
-        // Actualizamos la caché local con los cambios aplicados
         localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
 
         cambiosPendientes = {};
