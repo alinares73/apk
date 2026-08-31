@@ -18,11 +18,15 @@
     .badge-absent { background-color: #F8E2E0; color: #8C4340; }
     .badge-present { background-color: #DDEEE6; color: #235944; }
     .badge-special { background-color: #FEF3C7; color: #92400E; }
-    /* Deslizamiento táctil suave ocultando la barra de scroll */
+    /* Deslizamiento táctil suave ocultando la barra de scroll y usando snap nativo */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* Controlado dinámicamente por JS para el salto inicial */
-    #semana-container { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+    #semana-container { 
+      -webkit-overflow-scrolling: touch; 
+      scroll-behavior: smooth; 
+      scroll-snap-type: x mandatory; 
+    }
+    .snap-start { scroll-snap-align: start; }
   </style>
 </head>
 <body class="text-[#2B2B2B] p-4 sm:p-6 md:p-8 max-w-md md:max-w-xl lg:max-w-3xl mx-auto pb-24 select-none">
@@ -48,8 +52,8 @@
         <button onclick="cambiarSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
       
-      <!-- Carrusel horizontal calibrado al 100% de la anchura dividida entre 7 días -->
-      <div class="flex overflow-x-auto no-scrollbar py-2" id="semana-container"></div>
+      <!-- Carrusel horizontal calibrado al ancho total, sin paddings extraños -->
+      <div class="flex overflow-x-auto no-scrollbar py-2 w-full" id="semana-container"></div>
     </div>
 
     <!-- Cabecera Fecha y Usuario -->
@@ -246,7 +250,6 @@
     let headersSheet = [];
     let rowsSheet = [];
     
-    // Inicia dinámicamente, se actualiza en cargarDatos()
     let fechaIsoSeleccionada = ""; 
     let servicioModal = "";
     let servicioDetalleActivo = "desayuno"; 
@@ -265,15 +268,12 @@
       const datosCache = localStorage.getItem("comedor_cache_rows");
       const headersCache = localStorage.getItem("comedor_cache_headers");
 
-      // Cargar caché si existe para pintar inmediato
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
         rowsSheet = JSON.parse(datosCache);
-        
         iniciarEntorno();
       }
 
-      // Llamada real de fondo a Drive
       try {
         const res = await fetch(SCRIPT_URL + "?mode=getData");
         const json = await res.json();
@@ -290,7 +290,6 @@
       }
     }
 
-    // Lógica maestra de inicio unificada
     function iniciarEntorno() {
       if (!fechaIsoSeleccionada) {
         const hoy = new Date();
@@ -303,12 +302,12 @@
         construirCarruselContinuo();
         carruselInicializado = true;
         
-        // Retraso técnico mínimo para permitir que el DOM calcule los anchos de Lunes a Domingo y el scroll funcione al 100%
+        // Timeout robusto para asegurar que el DOM ha pintado los anchos antes de saltar al día de hoy
         setTimeout(() => {
-          enfocarLunesDeFecha(fechaIsoSeleccionada, false); // "false" evita que veas la animación desde Julio hasta Hoy.
+          enfocarLunesDeFecha(fechaIsoSeleccionada, false); 
           actualizarEstadoVisualCarrusel();
           renderizarVista();
-        }, 80); 
+        }, 100); 
       } else {
         actualizarEstadoVisualCarrusel();
         renderizarVista();
@@ -340,23 +339,23 @@
     }
 
     // =========================================================================
-    // MOTOR CARRUSEL: Rango amplio para scroll pero forzado a agruparse en 7 días
+    // MOTOR CARRUSEL: Rango amplio para scroll, 14.28% para encaje matemático
     // =========================================================================
     function construirCarruselContinuo() {
       const container = document.getElementById("semana-container");
       const nombresDiasL = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       let html = '';
 
-      // Generamos un bloque robusto de 147 días (21 semanas)
       const hoy = new Date();
       let fechaBase = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
       fechaBase.setDate(fechaBase.getDate() - 70); 
       
-      // Ajuste milimétrico para empezar siempre en Lunes y no romper el bloque de 7
+      // Ajuste milimétrico para empezar la generación en un lunes
       let dOw = fechaBase.getDay();
       let diff = dOw === 0 ? -6 : 1 - dOw;
       fechaBase.setDate(fechaBase.getDate() + diff); 
 
+      // Generamos 147 días (21 semanas)
       for (let i = 0; i < 147; i++) {
         const d = new Date(fechaBase);
         d.setDate(fechaBase.getDate() + i);
@@ -365,13 +364,13 @@
         let jsDay = d.getDay(); 
         let indexL = jsDay === 0 ? 6 : jsDay - 1; 
         let letraDia = nombresDiasL[indexL];
+        let isMonday = (indexL === 0);
 
-        // El wrapper ocupa el 14.28% EXACTO (1/7 del ancho total).
-        // Así forzamos a que si haces scroll a un lunes, entren 7 días clavados en pantalla.
+        // Cada wrapper ocupa un 14.2857% del contenedor y arranca el 'snap' táctil si es lunes
         html += `
-          <div id="day-wrap-${iso}" class="flex-shrink-0" style="width: calc(100% / 7);">
-            <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item mx-0.5 md:mx-1 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
-              <div class="text-[9px] md:text-xs font-bold opacity-70">${letraDia}</div>
+          <div id="day-wrap-${iso}" class="flex-shrink-0 ${isMonday ? 'snap-start' : ''}" style="width: 14.2857%;">
+            <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item m-1 text-center cursor-pointer py-2 px-1 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
+              <div class="text-[10px] md:text-xs font-bold opacity-70">${letraDia}</div>
               <div class="text-sm md:text-base font-extrabold mt-0.5">${d.getDate()}</div>
             </div>
           </div>
@@ -380,7 +379,7 @@
       container.innerHTML = html;
     }
 
-    // Calcula de forma estricta dónde está el lunes de la fecha seleccionada y salta ahí
+    // Calcula de forma estricta dónde está el lunes de la fecha y salta
     function enfocarLunesDeFecha(isoStr, smooth = true) {
       const container = document.getElementById("semana-container");
       if (!container) return;
@@ -397,19 +396,18 @@
       const elementoLunes = document.getElementById(`day-wrap-${isoLunes}`);
 
       if (elementoLunes) {
-        if (!smooth) container.style.scrollBehavior = 'auto'; // Desactiva animación para el arranque
-        
-        container.scrollLeft = elementoLunes.offsetLeft;
-
         if (!smooth) {
-          // Fuerza el recálculo y reactiva la animación fluida después de 50ms
-          void container.offsetWidth; 
+          container.style.scrollBehavior = 'auto';
+          container.scrollLeft = elementoLunes.offsetLeft;
+          // Reactivar comportamiento suave tras un instante
           setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 50);
+        } else {
+          container.scrollLeft = elementoLunes.offsetLeft;
         }
       }
     }
 
-    // FLECHAS DE NAVEGACIÓN: Saltan de 7 en 7 días y enfocan de Lunes a Domingo.
+    // FLECHAS DE NAVEGACIÓN: Saltan de 7 en 7 días y encuadran Lunes a Domingo.
     function cambiarSemanaFlecha(dir) {
       if (!fechaIsoSeleccionada) return;
       
@@ -420,7 +418,7 @@
       fechaIsoSeleccionada = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
       
       actualizarEstadoVisualCarrusel();
-      enfocarLunesDeFecha(fechaIsoSeleccionada, true); // Encuadra perfectamente la semana objetivo
+      enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
     }
 
@@ -435,12 +433,12 @@
     function actualizarEstadoVisualCarrusel() {
       const tarjetas = document.querySelectorAll('.day-card-item');
       tarjetas.forEach(t => {
-        t.className = "day-card-item mx-0.5 md:mx-1 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100";
+        t.className = "day-card-item m-1 text-center cursor-pointer py-2 px-1 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100";
       });
 
       const tarjetaActiva = document.getElementById(`day-card-${fechaIsoSeleccionada}`);
       if (tarjetaActiva) {
-        tarjetaActiva.className = "day-card-item mx-0.5 md:mx-1 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all bg-forest text-white shadow-sm scale-105";
+        tarjetaActiva.className = "day-card-item m-1 text-center cursor-pointer py-2 px-1 rounded-xl transition-all bg-forest text-white shadow-sm scale-105";
       }
 
       const [sy, sm, sd] = fechaIsoSeleccionada.split('-').map(Number);
