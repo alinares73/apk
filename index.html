@@ -242,6 +242,7 @@
         
         <div class="h-px bg-gray-200 my-1"></div>
         
+        <!-- Nuevo botón mágico para añadir observaciones -->
         <button onclick="abrirModalObservaciones()" class="bg-[#EDE5CD] text-[#7A6031] py-3 rounded-xl font-bold text-sm md:text-base shadow-sm active:scale-95 transition-transform">
           📝 Añadir observación
         </button>
@@ -250,13 +251,13 @@
     </div>
   </div>
 
-  <!-- Modal para Editar Observaciones -->
+  <!-- Modal para Editar Observaciones Dinámicas -->
   <div id="modal-observaciones" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[85vh]">
       <h3 class="font-extrabold text-gray-900 text-lg mb-4 text-center">Observaciones del día</h3>
       
       <div id="lista-observaciones-inputs" class="flex-1 overflow-y-auto space-y-3 mb-5 no-scrollbar">
-        <!-- Las áreas de texto se generan aquí por JS -->
+        <!-- Las áreas de texto se inyectarán aquí -->
       </div>
       
       <div class="flex space-x-3 mt-auto">
@@ -277,7 +278,6 @@
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
     let carruselInicializado = false;
-    let observacionesActivas = [];
 
     let ausenciaAnio = 2026;
     let ausenciaMes = 7; 
@@ -294,7 +294,6 @@
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
         rowsSheet = JSON.parse(datosCache);
-        
         iniciarEntorno();
       }
 
@@ -362,7 +361,7 @@
     }
 
     // =========================================================================
-    // MOTOR CARRUSEL
+    // MOTOR CARRUSEL: Tarjetas matemáticas para encajar exactamente 7 días
     // =========================================================================
     function construirCarruselContinuo() {
       const container = document.getElementById("semana-container");
@@ -464,7 +463,7 @@
     }
 
     // =========================================================================
-    // MODALES Y OBSERVACIONES
+    // MODALES Y OBSERVACIONES DINÁMICAS (NUEVO)
     // =========================================================================
 
     function abrirModalEstado(meal) {
@@ -490,56 +489,51 @@
       cerrarModal(); 
       const container = document.getElementById("lista-observaciones-inputs");
       container.innerHTML = "";
-      observacionesActivas = [];
-
+      
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
       if (colIndex === -1) {
         alert("El día seleccionado no se encuentra en la base de datos.");
         return;
       }
 
-      // Buscar dónde empiezan las Observaciones
-      let obsRowIndex = -1;
-      for (let r = 0; r < rowsSheet.length; r++) {
-        const textoCelda = String(rowsSheet[r][colIndex] || "").trim();
-        if (textoCelda.toLowerCase().includes("observaciones")) {
-          obsRowIndex = r;
-          break;
-        }
-      }
+      let obsArray = [];
+      const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
 
-      if (obsRowIndex !== -1) {
-        let r = obsRowIndex + 1;
-        while (r < rowsSheet.length) {
-          const pName = String(rowsSheet[r][1] || "").trim();
-          const clave = `${pName}|${fechaIsoSeleccionada}|desayuno`; 
-          const pendiente = cambiosPendientes[clave];
-          const valorOriginal = String(rowsSheet[r][colIndex] || "").trim();
-          
-          if (valorOriginal.toLowerCase().includes("observaciones")) break; 
-
-          let valorActual = pendiente !== undefined ? pendiente : valorOriginal;
-
-          if (valorOriginal === "" && (pendiente === undefined || pendiente === "")) {
-            observacionesActivas.push({ pName: pName, text: "" });
-            break; 
-          } else {
-            observacionesActivas.push({ pName: pName, text: valorActual });
-          }
-          r++;
-        }
+      // Cargamos notas previas o los cambios que hayamos dejado pendientes
+      if (pendienteObs !== undefined) {
+         obsArray = [...pendienteObs];
       } else {
-        container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones para este día.</p>`;
-        document.getElementById("modal-observaciones").classList.remove("hidden");
-        return;
+         let obsRowIndex = -1;
+         for (let r = 0; r < rowsSheet.length; r++) {
+           if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
+             obsRowIndex = r;
+             break;
+           }
+         }
+         
+         if (obsRowIndex !== -1) {
+           for (let r = obsRowIndex + 1; r < rowsSheet.length; r++) {
+             const val = String(rowsSheet[r][colIndex] || "").trim();
+             if (val === "") break; // Fin de observaciones detectado por celda vacía
+             if (val.toLowerCase().includes("observaciones")) break;
+             obsArray.push(val);
+           }
+         } else {
+           container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones para este día en la hoja de cálculo.</p>`;
+           document.getElementById("modal-observaciones").classList.remove("hidden");
+           return;
+         }
       }
+
+      // Añadimos siempre un bloque vacío al final para agregar una nueva nota
+      obsArray.push("");
 
       let html = "";
-      observacionesActivas.forEach((obs, index) => {
-        const esNuevo = (index === observacionesActivas.length - 1);
+      obsArray.forEach((text, index) => {
+        const esNuevo = (index === obsArray.length - 1);
         html += `
           <div>
-            <textarea id="obs-input-${index}" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-800 outline-none focus:border-forest transition-colors shadow-sm" placeholder="${esNuevo ? 'Escribir nueva observación...' : 'Editar observación...'}">${obs.text}</textarea>
+            <textarea id="obs-input-${index}" rows="2" class="obs-input-field w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-800 outline-none focus:border-forest transition-colors shadow-sm" placeholder="${esNuevo ? 'Escribir nueva observación...' : 'Editar o borrar observación...'}">${text}</textarea>
           </div>
         `;
       });
@@ -553,23 +547,18 @@
     }
 
     function guardarObservacionesLocales() {
-      try {
-        observacionesActivas.forEach((obs, index) => {
-          const input = document.getElementById(`obs-input-${index}`);
-          if (input) {
-            const nuevoTexto = input.value.trim();
-            if (nuevoTexto !== obs.text) {
-                const clave = `${obs.pName}|${fechaIsoSeleccionada}|desayuno`;
-                cambiosPendientes[clave] = nuevoTexto;
-            }
-          }
-        });
-        cerrarModalObservaciones();
-        actualizarEstadoBotonGuardarSup();
-        renderizarVista();
-      } catch (e) {
-        console.error("Error al guardar observaciones:", e);
-      }
+      const inputs = document.querySelectorAll('.obs-input-field');
+      let nuevosValores = [];
+      
+      inputs.forEach(input => {
+         const val = input.value.trim();
+         if (val !== "") nuevosValores.push(val); // Solo guarda celdas no vacías
+      });
+
+      cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
+      cerrarModalObservaciones();
+      actualizarEstadoBotonGuardarSup();
+      renderizarVista();
     }
 
     function actualizarEstadoBotonGuardarSup() {
@@ -630,6 +619,7 @@
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
       const filaPersona = rowsSheet.find(r => r[1] === usuarioSel);
 
+      // 1. Mostrar estado del usuario seleccionado
       if (colIndex !== -1 && filaPersona) {
         const vDesay = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
         const vAlm = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
@@ -640,38 +630,32 @@
         document.getElementById("tu-cena").textContent = formatearVisual(vCena);
       }
 
+      // 2. Títulos de fecha
       const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
       const dateObj = new Date(y, m - 1, d);
       document.getElementById("dia-num").textContent = d;
       document.getElementById("dia-txt").textContent = dateObj.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
       document.getElementById("mes-txt").textContent = `DE ${dateObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()}`;
 
+      // 3. Extracción de Observaciones para mostrar
       let listaNotas = [];
-      if (colIndex !== -1 && rowsSheet.length > 0) {
+      const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
+
+      if (pendienteObs !== undefined) {
+         listaNotas = [...pendienteObs];
+      } else if (colIndex !== -1 && rowsSheet.length > 0) {
+        let obsRowIndex = -1;
         for (let r = 0; r < rowsSheet.length; r++) {
-          const textoCelda = String(rowsSheet[r][colIndex] || "").trim();
-          if (textoCelda.toLowerCase().includes("observaciones")) {
-            let siguienteFila = r + 1;
-            while (siguienteFila < rowsSheet.length) {
-              const pNameNota = String(rowsSheet[siguienteFila][1] || "").trim();
-              const clavePendiente = `${pNameNota}|${fechaIsoSeleccionada}|desayuno`;
-              const valorPendiente = cambiosPendientes[clavePendiente];
-              const valorOriginal = String(rowsSheet[siguienteFila][colIndex] || "").trim();
-              
-              if (valorOriginal.toLowerCase().includes("observaciones")) break;
-
-              let valorMostrar = valorPendiente !== undefined ? valorPendiente : valorOriginal;
-
-              if (valorMostrar !== "") {
-                listaNotas.push(valorMostrar);
-              }
-
-              if (valorOriginal === "" && (valorPendiente === undefined || valorPendiente === "")) {
-                break; 
-              }
-              siguienteFila++;
-            }
+          if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
+            obsRowIndex = r;
             break;
+          }
+        }
+        if (obsRowIndex !== -1) {
+          for (let r = obsRowIndex + 1; r < rowsSheet.length; r++) {
+             const val = String(rowsSheet[r][colIndex] || "").trim();
+             if (val === "") break;
+             listaNotas.push(val);
           }
         }
       }
@@ -685,6 +669,7 @@
         contenedorNota.classList.add("hidden");
       }
 
+      // 4. Contadores y Desgloses
       let cDesay = 0, cAlm = 0, cCena = 0;
       rowsSheet.forEach(r => {
         const pName = r[1];
@@ -756,7 +741,6 @@
       }
       
       actualizarEstilosTarjetasResumen();
-      actualizarEstadoBotonGuardarSup();
     }
 
     function encontrarColumnaFechaExacta(iso) {
@@ -787,7 +771,7 @@
       const v = String(val).toLowerCase();
       if (v === "no") return "No";
       if (v === "tarde") return "Tarde";
-      if (v === "temp") return "Temp.";
+      if (v === "temp") return "Temprano";
       if (v === "bolsa") return "Bolsa";
       return val;
     }
@@ -998,7 +982,6 @@
           setTimeout(() => {
             cerrarPantallaAusencias();
             
-            // Actualización rápida en memoria para no cargar toda la vista de cero
             fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
               if (j.ok) {
                 headersSheet = j.headers;
@@ -1027,68 +1010,109 @@
       const keys = Object.keys(cambiosPendientes);
       if (keys.length === 0) return;
 
+      document.getElementById("sync-status").textContent = "Guardando...";
+
       let cambiosPorPersona = {};
+      let obsPorFecha = {};
+
+      // Separa los cambios de celdas normales de las observaciones dinámicas
       keys.forEach(k => {
-        const [person, fecha, meal] = k.split('|');
-        if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
-        cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
+        if (k.startsWith("OBS_ARRAY|")) {
+           const fecha = k.split('|')[1];
+           obsPorFecha[fecha] = cambiosPendientes[k];
+        } else {
+           const [person, fecha, meal] = k.split('|');
+           if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
+           cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
+        }
       });
 
-      try {
-        document.getElementById("sync-status").textContent = "Guardando...";
-        
-        for (const person in cambiosPorPersona) {
-          const cellsStr = cambiosPorPersona[person].join(';');
-          const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              mode: "cells",
-              person: person,
-              cells: cellsStr
-            })
-          });
-          const json = await response.json();
-          if (!json.ok) throw new Error(json.error || "Error al escribir");
-        }
-
-        // ====== SOLUCIÓN AL EFECTO REBOTE (PARPADEO) ======
-        // Aplicamos los cambios locales a la memoria de la aplicación ANTES de vaciar la lista de pendientes.
-        keys.forEach(k => {
+      // ====== LA MAGIA PARA EVITAR EL "EFECTO REBOTE" ======
+      // Inyectamos todo en la caché ANTES de limpiar la cola, así la vista no parpadea
+      
+      // 1. Inyectar celdas de usuario
+      keys.forEach(k => {
+        if (!k.startsWith("OBS_ARRAY|")) {
           const [person, fecha, meal] = k.split('|');
           const colIndex = encontrarColumnaFechaExacta(fecha);
           if (colIndex !== -1) {
-            // Buscamos la fila correcta, gestionando sin errores nombres vacíos en observaciones
             const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
             if (fila) {
               const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
               fila[colIndex + offset] = cambiosPendientes[k];
             }
           }
-        });
-        
-        localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-        
-        // Ahora sí, borramos porque ya están integrados en memoria
-        cambiosPendientes = {};
-        actualizarEstadoBotonGuardarSup();
-        renderizarVista();
-        document.getElementById("sync-status").textContent = "Sincronizado";
+        }
+      });
 
-        // Y pedimos a Google los datos nuevos silenciosamente por detrás para asegurar consistencia
+      // 2. Inyectar Observaciones dinámicas en la memoria de la caché local
+      for (const fecha in obsPorFecha) {
+         const notas = obsPorFecha[fecha];
+         const colIndex = encontrarColumnaFechaExacta(fecha);
+         if (colIndex !== -1) {
+           let obsRowIndex = -1;
+           for (let r = 0; r < rowsSheet.length; r++) {
+             if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
+               obsRowIndex = r; break;
+             }
+           }
+           if (obsRowIndex !== -1) {
+             let currentR = obsRowIndex + 1;
+             for (let i = 0; i < notas.length; i++) {
+               if (currentR >= rowsSheet.length) rowsSheet.push(new Array(rowsSheet[0].length).fill(""));
+               rowsSheet[currentR][colIndex] = notas[i];
+               currentR++;
+             }
+             // Limpiar posibles huecos viejos debajo
+             for (let i = 0; i < 5; i++) {
+               if (currentR < rowsSheet.length) rowsSheet[currentR][colIndex] = "";
+               currentR++;
+             }
+           }
+         }
+      }
+      
+      // Actualiza la memoria visual al instante
+      localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+      cambiosPendientes = {};
+      actualizarEstadoBotonGuardarSup();
+      renderizarVista();
+      document.getElementById("sync-status").textContent = "Sincronizado";
+
+      // Envia todo al servidor por detrás silenciosamente
+      try {
+        // Enviar celdas normales
+        for (const person in cambiosPorPersona) {
+          const cellsStr = cambiosPorPersona[person].join(';');
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ mode: "cells", person: person, cells: cellsStr })
+          });
+        }
+
+        // Enviar Observaciones agrupadas
+        for (const fecha in obsPorFecha) {
+          const notas = obsPorFecha[fecha];
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ mode: "observaciones", date: fecha, values: notas })
+          });
+        }
+
+        // Validación final con el servidor para estar 100% seguros
         fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
           if (j.ok) {
             headersSheet = j.headers;
             rowsSheet = j.rows;
             localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
             localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-            // No hacemos renderizarVista() aquí si no es necesario para evitar tirones
           }
         });
 
       } catch (err) {
-        console.error(err);
-        document.getElementById("sync-status").textContent = "Error";
+        console.error("Error al sincronizar con Drive:", err);
       }
     }
 
