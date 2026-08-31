@@ -52,7 +52,7 @@
         <button onclick="cambiarSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
       
-      <!-- Carrusel horizontal calibrado al ancho total, sin paddings extraños -->
+      <!-- Carrusel horizontal calibrado al ancho total -->
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
@@ -95,7 +95,7 @@
     <div id="contenedor-btn-guardar-sup" class="hidden mt-4">
       <button onclick="guardarCambiosPendientes()" class="w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse">
         <div class="flex items-center space-x-2">
-          <span>💾</span>
+          <span id="btn-guardar-icono">💾</span>
           <span id="btn-guardar-txt-sup">Guardar cambios (0 pendientes)</span>
         </div>
         <span id="sync-status" class="text-xs text-white/70 font-medium tracking-tight">Pendiente</span>
@@ -242,7 +242,6 @@
         
         <div class="h-px bg-gray-200 my-1"></div>
         
-        <!-- Nuevo botón mágico para añadir observaciones -->
         <button onclick="abrirModalObservaciones()" class="bg-[#EDE5CD] text-[#7A6031] py-3 rounded-xl font-bold text-sm md:text-base shadow-sm active:scale-95 transition-transform">
           📝 Añadir observación
         </button>
@@ -463,7 +462,7 @@
     }
 
     // =========================================================================
-    // MODALES Y OBSERVACIONES DINÁMICAS (NUEVO)
+    // MODALES Y OBSERVACIONES DINÁMICAS
     // =========================================================================
 
     function abrirModalEstado(meal) {
@@ -499,7 +498,6 @@
       let obsArray = [];
       const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
 
-      // Cargamos notas previas o los cambios que hayamos dejado pendientes
       if (pendienteObs !== undefined) {
          obsArray = [...pendienteObs];
       } else {
@@ -514,7 +512,7 @@
          if (obsRowIndex !== -1) {
            for (let r = obsRowIndex + 1; r < rowsSheet.length; r++) {
              const val = String(rowsSheet[r][colIndex] || "").trim();
-             if (val === "") break; // Fin de observaciones detectado por celda vacía
+             if (val === "") break; 
              if (val.toLowerCase().includes("observaciones")) break;
              obsArray.push(val);
            }
@@ -525,7 +523,6 @@
          }
       }
 
-      // Añadimos siempre un bloque vacío al final para agregar una nueva nota
       obsArray.push("");
 
       let html = "";
@@ -552,7 +549,7 @@
       
       inputs.forEach(input => {
          const val = input.value.trim();
-         if (val !== "") nuevosValores.push(val); // Solo guarda celdas no vacías
+         if (val !== "") nuevosValores.push(val); 
       });
 
       cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
@@ -576,6 +573,8 @@
       }
     }
 
+    // =========================================================================
+    // VISUALIZACIÓN PRINCIPAL Y DESGLOSES
     // =========================================================================
 
     function seleccionarServicioDetalle(servicio) {
@@ -619,7 +618,6 @@
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
       const filaPersona = rowsSheet.find(r => r[1] === usuarioSel);
 
-      // 1. Mostrar estado del usuario seleccionado
       if (colIndex !== -1 && filaPersona) {
         const vDesay = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
         const vAlm = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
@@ -630,14 +628,12 @@
         document.getElementById("tu-cena").textContent = formatearVisual(vCena);
       }
 
-      // 2. Títulos de fecha
       const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
       const dateObj = new Date(y, m - 1, d);
       document.getElementById("dia-num").textContent = d;
       document.getElementById("dia-txt").textContent = dateObj.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
       document.getElementById("mes-txt").textContent = `DE ${dateObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()}`;
 
-      // 3. Extracción de Observaciones para mostrar
       let listaNotas = [];
       const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
 
@@ -669,7 +665,6 @@
         contenedorNota.classList.add("hidden");
       }
 
-      // 4. Contadores y Desgloses
       let cDesay = 0, cAlm = 0, cCena = 0;
       rowsSheet.forEach(r => {
         const pName = r[1];
@@ -710,7 +705,7 @@
           if (valorCelda === "" || valorCelda === "si") {
             listSi.push(pName);
           } else if (valorCelda === "tarde" || valorCelda === "temp" || valorCelda === "bolsa") {
-            let etiqueta = valorCelda === 'tarde' ? 'Tarde' : (valorCelda === 'temp' ? 'Temp' : 'Bolsa');
+            let etiqueta = valorCelda === 'tarde' ? 'Tarde' : (valorCelda === 'temp' ? 'Temprano' : 'Bolsa');
             listEsp.push(`${pName} (${etiqueta})`);
           } else {
             if (pName !== 'Inv 1' && pName !== 'Inv 2') {
@@ -1006,16 +1001,29 @@
       }
     }
 
+    // =========================================================================
+    // GUARDADO PRINCIPAL CON RETROALIMENTACIÓN VISUAL SOSTENIDA
+    // =========================================================================
     async function guardarCambiosPendientes() {
       const keys = Object.keys(cambiosPendientes);
       if (keys.length === 0) return;
 
-      document.getElementById("sync-status").textContent = "Guardando...";
+      // 1. Mostrar estado de guardado bloqueando la interfaz para que el usuario sepa que está trabajando
+      const btnGuardarSup = document.querySelector("#contenedor-btn-guardar-sup button");
+      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
+      const syncStatus = document.getElementById("sync-status");
+      const btnIcono = document.getElementById("btn-guardar-icono");
+
+      btnGuardarSup.disabled = true;
+      btnGuardarSup.className = "w-full bg-gray-100 text-gray-500 font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base transition-colors cursor-wait";
+      btnIcono.textContent = "⏳";
+      btnTxtSup.textContent = "Guardando en Drive...";
+      syncStatus.textContent = "guardando cambios...";
+      syncStatus.className = "text-[11px] text-gray-400 font-semibold tracking-tight";
 
       let cambiosPorPersona = {};
       let obsPorFecha = {};
 
-      // Separa los cambios de celdas normales de las observaciones dinámicas
       keys.forEach(k => {
         if (k.startsWith("OBS_ARRAY|")) {
            const fecha = k.split('|')[1];
@@ -1027,59 +1035,6 @@
         }
       });
 
-      // ====== LA MAGIA PARA EVITAR EL "EFECTO REBOTE" ======
-      // Inyectamos todo en la caché ANTES de limpiar la cola, así la vista no parpadea
-      
-      // 1. Inyectar celdas de usuario
-      keys.forEach(k => {
-        if (!k.startsWith("OBS_ARRAY|")) {
-          const [person, fecha, meal] = k.split('|');
-          const colIndex = encontrarColumnaFechaExacta(fecha);
-          if (colIndex !== -1) {
-            const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
-            if (fila) {
-              const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
-              fila[colIndex + offset] = cambiosPendientes[k];
-            }
-          }
-        }
-      });
-
-      // 2. Inyectar Observaciones dinámicas en la memoria de la caché local
-      for (const fecha in obsPorFecha) {
-         const notas = obsPorFecha[fecha];
-         const colIndex = encontrarColumnaFechaExacta(fecha);
-         if (colIndex !== -1) {
-           let obsRowIndex = -1;
-           for (let r = 0; r < rowsSheet.length; r++) {
-             if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
-               obsRowIndex = r; break;
-             }
-           }
-           if (obsRowIndex !== -1) {
-             let currentR = obsRowIndex + 1;
-             for (let i = 0; i < notas.length; i++) {
-               if (currentR >= rowsSheet.length) rowsSheet.push(new Array(rowsSheet[0].length).fill(""));
-               rowsSheet[currentR][colIndex] = notas[i];
-               currentR++;
-             }
-             // Limpiar posibles huecos viejos debajo
-             for (let i = 0; i < 5; i++) {
-               if (currentR < rowsSheet.length) rowsSheet[currentR][colIndex] = "";
-               currentR++;
-             }
-           }
-         }
-      }
-      
-      // Actualiza la memoria visual al instante
-      localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-      cambiosPendientes = {};
-      actualizarEstadoBotonGuardarSup();
-      renderizarVista();
-      document.getElementById("sync-status").textContent = "Sincronizado";
-
-      // Envia todo al servidor por detrás silenciosamente
       try {
         // Enviar celdas normales
         for (const person in cambiosPorPersona) {
@@ -1101,7 +1056,61 @@
           });
         }
 
-        // Validación final con el servidor para estar 100% seguros
+        // 2. LA MAGIA: Inyectamos en caché local ANTES de vaciar la cola para evitar parpadeos
+        keys.forEach(k => {
+          if (!k.startsWith("OBS_ARRAY|")) {
+            const [person, fecha, meal] = k.split('|');
+            const colIndex = encontrarColumnaFechaExacta(fecha);
+            if (colIndex !== -1) {
+              const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
+              if (fila) {
+                const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
+                fila[colIndex + offset] = cambiosPendientes[k];
+              }
+            }
+          }
+        });
+
+        for (const fecha in obsPorFecha) {
+           const notas = obsPorFecha[fecha];
+           const colIndex = encontrarColumnaFechaExacta(fecha);
+           if (colIndex !== -1) {
+             let obsRowIndex = -1;
+             for (let r = 0; r < rowsSheet.length; r++) {
+               if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
+                 obsRowIndex = r; break;
+               }
+             }
+             if (obsRowIndex !== -1) {
+               let currentR = obsRowIndex + 1;
+               for (let i = 0; i < notas.length; i++) {
+                 if (currentR >= rowsSheet.length) rowsSheet.push(new Array(rowsSheet[0].length).fill(""));
+                 rowsSheet[currentR][colIndex] = notas[i];
+                 currentR++;
+               }
+               for (let i = 0; i < 5; i++) {
+                 if (currentR < rowsSheet.length) rowsSheet[currentR][colIndex] = "";
+                 currentR++;
+               }
+             }
+           }
+        }
+        
+        localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+        
+        // Vaciamos los cambios ahora que ya están consolidados localmente
+        cambiosPendientes = {};
+        
+        // 3. Restaurar visuales originales (el botón verde desaparecerá inmediatamente al llamar a actualizarEstado)
+        btnGuardarSup.disabled = false;
+        btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
+        btnIcono.textContent = "💾";
+        syncStatus.className = "text-xs text-white/70 font-medium tracking-tight";
+        
+        actualizarEstadoBotonGuardarSup();
+        renderizarVista();
+
+        // 4. Doble validación silenciosa en background para asegurar que la copia final de Drive coincide al 100%
         fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
           if (j.ok) {
             headersSheet = j.headers;
@@ -1113,6 +1122,19 @@
 
       } catch (err) {
         console.error("Error al sincronizar con Drive:", err);
+        btnIcono.textContent = "⚠️";
+        btnTxtSup.textContent = "Error de conexión";
+        syncStatus.textContent = "Reintentar";
+        syncStatus.className = "text-xs text-red-500 font-bold";
+        btnGuardarSup.disabled = false;
+        
+        // Retornamos el botón a su estado jugable en rojo/gris unos segundos si ha fallado la red
+        setTimeout(() => {
+           btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
+           btnIcono.textContent = "💾";
+           syncStatus.className = "text-xs text-white/70 font-medium tracking-tight";
+           actualizarEstadoBotonGuardarSup();
+        }, 4000);
       }
     }
 
