@@ -52,7 +52,7 @@
         <button onclick="cambiarSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
       
-      <!-- Carrusel horizontal calibrado al ancho total -->
+      <!-- Carrusel horizontal calibrado al ancho total, sin paddings extraños -->
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
@@ -234,7 +234,7 @@
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center">
       <h3 id="modal-titulo" class="font-extrabold text-gray-900 text-lg mb-4">Seleccionar estado</h3>
       <div class="grid grid-cols-1 gap-2.5">
-        <button onclick="asignarEstadoLocal('')" class="bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold text-sm md:text-base">Sí (Asiste)</button>
+        <button onclick="asignarEstadoLocal('')" class="bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold text-sm md:text-base">Sí</button>
         <button onclick="asignarEstadoLocal('no')" class="bg-[#F8E2E0] text-[#8C4340] py-3 rounded-xl font-bold text-sm md:text-base">No</button>
         <button onclick="asignarEstadoLocal('tarde')" class="bg-amber-100 text-amber-800 py-3 rounded-xl font-bold text-sm md:text-base">Tarde</button>
         <button onclick="asignarEstadoLocal('temp')" class="bg-blue-100 text-blue-800 py-3 rounded-xl font-bold text-sm md:text-base">Temprano</button>
@@ -242,7 +242,6 @@
         
         <div class="h-px bg-gray-200 my-1"></div>
         
-        <!-- Nuevo botón para añadir/editar observaciones -->
         <button onclick="abrirModalObservaciones()" class="bg-[#EDE5CD] text-[#7A6031] py-3 rounded-xl font-bold text-sm md:text-base shadow-sm active:scale-95 transition-transform">
           📝 Añadir observación
         </button>
@@ -273,13 +272,12 @@
     let headersSheet = [];
     let rowsSheet = [];
     
-    // Inicia dinámicamente
     let fechaIsoSeleccionada = ""; 
     let servicioModal = "";
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
     let carruselInicializado = false;
-    let observacionesActivas = []; // Array temporal para editar notas
+    let observacionesActivas = [];
 
     let ausenciaAnio = 2026;
     let ausenciaMes = 7; 
@@ -296,6 +294,7 @@
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
         rowsSheet = JSON.parse(datosCache);
+        
         iniciarEntorno();
       }
 
@@ -362,6 +361,9 @@
       actualizarTituloAusencias();
     }
 
+    // =========================================================================
+    // MOTOR CARRUSEL
+    // =========================================================================
     function construirCarruselContinuo() {
       const container = document.getElementById("semana-container");
       const nombresDiasL = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
@@ -386,7 +388,7 @@
         let isMonday = (indexL === 0);
 
         html += `
-          <div id="day-wrap-${iso}" class="flex-shrink-0 box-border px-0.5 snap-start" style="flex: 0 0 calc(100% / 7);">
+          <div id="day-wrap-${iso}" class="flex-shrink-0 box-border px-0.5 ${isMonday ? 'snap-start' : ''}" style="flex: 0 0 calc(100% / 7);">
             <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item w-full flex flex-col items-center justify-center cursor-pointer py-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
               <div class="text-[10px] md:text-xs font-bold opacity-70">${letraDia}</div>
               <div class="text-sm md:text-base font-extrabold mt-0.5">${d.getDate()}</div>
@@ -414,7 +416,6 @@
 
       if (elementoLunes) {
         const offsetObjetivo = elementoLunes.offsetLeft;
-        
         if (!smooth) {
           container.style.scrollBehavior = 'auto';
           container.scrollLeft = offsetObjetivo;
@@ -463,7 +464,7 @@
     }
 
     // =========================================================================
-    // LÓGICA DE MODALES DE ESTADO Y OBSERVACIONES
+    // MODALES Y OBSERVACIONES
     // =========================================================================
 
     function abrirModalEstado(meal) {
@@ -481,10 +482,10 @@
       const usuarioSel = document.getElementById("user-select").value;
       const clave = `${usuarioSel}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
+      actualizarEstadoBotonGuardarSup();
       renderizarVista();
     }
 
-    // Funciones del Modal de Observaciones
     function abrirModalObservaciones() {
       cerrarModal(); 
       const container = document.getElementById("lista-observaciones-inputs");
@@ -497,6 +498,7 @@
         return;
       }
 
+      // Buscar dónde empiezan las Observaciones
       let obsRowIndex = -1;
       for (let r = 0; r < rowsSheet.length; r++) {
         const textoCelda = String(rowsSheet[r][colIndex] || "").trim();
@@ -509,26 +511,25 @@
       if (obsRowIndex !== -1) {
         let r = obsRowIndex + 1;
         while (r < rowsSheet.length) {
-          const pName = rowsSheet[r][1]; // Columna de nombres para identificar la fila
-          const clave = `${pName}|${fechaIsoSeleccionada}|desayuno`; // Usamos la clave genérica de la columna principal
+          const pName = String(rowsSheet[r][1] || "").trim();
+          const clave = `${pName}|${fechaIsoSeleccionada}|desayuno`; 
           const pendiente = cambiosPendientes[clave];
           const valorOriginal = String(rowsSheet[r][colIndex] || "").trim();
           
-          if (valorOriginal.toLowerCase().includes("observaciones")) break; // Final de bloque de notas
+          if (valorOriginal.toLowerCase().includes("observaciones")) break; 
+
+          let valorActual = pendiente !== undefined ? pendiente : valorOriginal;
 
           if (valorOriginal === "" && (pendiente === undefined || pendiente === "")) {
-            // Es la primera celda vacía: hueco para nueva nota
             observacionesActivas.push({ pName: pName, text: "" });
-            break;
+            break; 
           } else {
-            // Nota existente
-            let valorActual = pendiente !== undefined ? pendiente : valorOriginal;
             observacionesActivas.push({ pName: pName, text: valorActual });
           }
           r++;
         }
       } else {
-        container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones habilitada para este día en la hoja.</p>`;
+        container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones para este día.</p>`;
         document.getElementById("modal-observaciones").classList.remove("hidden");
         return;
       }
@@ -552,22 +553,24 @@
     }
 
     function guardarObservacionesLocales() {
-      observacionesActivas.forEach((obs, index) => {
-        const input = document.getElementById(`obs-input-${index}`);
-        if (input) {
-          const nuevoTexto = input.value.trim();
-          // Guarda si el texto es distinto al original o si es una nota nueva que han rellenado
-          if (nuevoTexto !== obs.text || nuevoTexto !== "") {
-              const clave = `${obs.pName}|${fechaIsoSeleccionada}|desayuno`; // La columna de la nota es la primera del día
-              cambiosPendientes[clave] = nuevoTexto;
+      try {
+        observacionesActivas.forEach((obs, index) => {
+          const input = document.getElementById(`obs-input-${index}`);
+          if (input) {
+            const nuevoTexto = input.value.trim();
+            if (nuevoTexto !== obs.text) {
+                const clave = `${obs.pName}|${fechaIsoSeleccionada}|desayuno`;
+                cambiosPendientes[clave] = nuevoTexto;
+            }
           }
-        }
-      });
-      cerrarModalObservaciones();
-      renderizarVista();
+        });
+        cerrarModalObservaciones();
+        actualizarEstadoBotonGuardarSup();
+        renderizarVista();
+      } catch (e) {
+        console.error("Error al guardar observaciones:", e);
+      }
     }
-
-    // =========================================================================
 
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
@@ -583,6 +586,8 @@
         contenedorSup.classList.add("hidden");
       }
     }
+
+    // =========================================================================
 
     function seleccionarServicioDetalle(servicio) {
       servicioDetalleActivo = servicio; 
@@ -641,7 +646,6 @@
       document.getElementById("dia-txt").textContent = dateObj.toLocaleDateString('es-ES', { weekday: 'long' }).toUpperCase();
       document.getElementById("mes-txt").textContent = `DE ${dateObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()}`;
 
-      // Extraer observaciones combinando originales con cambios pendientes
       let listaNotas = [];
       if (colIndex !== -1 && rowsSheet.length > 0) {
         for (let r = 0; r < rowsSheet.length; r++) {
@@ -649,7 +653,7 @@
           if (textoCelda.toLowerCase().includes("observaciones")) {
             let siguienteFila = r + 1;
             while (siguienteFila < rowsSheet.length) {
-              const pNameNota = rowsSheet[siguienteFila][1];
+              const pNameNota = String(rowsSheet[siguienteFila][1] || "").trim();
               const clavePendiente = `${pNameNota}|${fechaIsoSeleccionada}|desayuno`;
               const valorPendiente = cambiosPendientes[clavePendiente];
               const valorOriginal = String(rowsSheet[siguienteFila][colIndex] || "").trim();
@@ -662,7 +666,6 @@
                 listaNotas.push(valorMostrar);
               }
 
-              // Paramos si la original estaba vacía y no hay nada escrito por el usuario en pendientes
               if (valorOriginal === "" && (valorPendiente === undefined || valorPendiente === "")) {
                 break; 
               }
@@ -994,7 +997,18 @@
 
           setTimeout(() => {
             cerrarPantallaAusencias();
-            cargarDatos();
+            
+            // Actualización rápida en memoria para no cargar toda la vista de cero
+            fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
+              if (j.ok) {
+                headersSheet = j.headers;
+                rowsSheet = j.rows;
+                localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
+                localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+                renderizarVista();
+              }
+            });
+            
           }, 1200);
         } else {
           txtIcono.textContent = "Error al guardar";
@@ -1038,11 +1052,40 @@
           if (!json.ok) throw new Error(json.error || "Error al escribir");
         }
 
+        // ====== SOLUCIÓN AL EFECTO REBOTE (PARPADEO) ======
+        // Aplicamos los cambios locales a la memoria de la aplicación ANTES de vaciar la lista de pendientes.
+        keys.forEach(k => {
+          const [person, fecha, meal] = k.split('|');
+          const colIndex = encontrarColumnaFechaExacta(fecha);
+          if (colIndex !== -1) {
+            // Buscamos la fila correcta, gestionando sin errores nombres vacíos en observaciones
+            const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
+            if (fila) {
+              const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
+              fila[colIndex + offset] = cambiosPendientes[k];
+            }
+          }
+        });
+        
         localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-
+        
+        // Ahora sí, borramos porque ya están integrados en memoria
         cambiosPendientes = {};
-        cargarDatos(); 
+        actualizarEstadoBotonGuardarSup();
+        renderizarVista();
         document.getElementById("sync-status").textContent = "Sincronizado";
+
+        // Y pedimos a Google los datos nuevos silenciosamente por detrás para asegurar consistencia
+        fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
+          if (j.ok) {
+            headersSheet = j.headers;
+            rowsSheet = j.rows;
+            localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
+            localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+            // No hacemos renderizarVista() aquí si no es necesario para evitar tirones
+          }
+        });
+
       } catch (err) {
         console.error(err);
         document.getElementById("sync-status").textContent = "Error";
