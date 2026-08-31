@@ -18,10 +18,11 @@
     .badge-absent { background-color: #F8E2E0; color: #8C4340; }
     .badge-present { background-color: #DDEEE6; color: #235944; }
     .badge-special { background-color: #FEF3C7; color: #92400E; }
-    /* Deslizamiento táctil suave ocultando la barra */
+    /* Deslizamiento táctil suave ocultando la barra de scroll */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    #semana-container { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+    /* Controlado dinámicamente por JS para el salto inicial */
+    #semana-container { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
   </style>
 </head>
 <body class="text-[#2B2B2B] p-4 sm:p-6 md:p-8 max-w-md md:max-w-xl lg:max-w-3xl mx-auto pb-24 select-none">
@@ -42,12 +43,12 @@
     <!-- Selector Carrusel Deslizable de Días -->
     <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none">
       <div class="flex items-center justify-between mb-2">
-        <button onclick="moverSemanaFlecha(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
-        <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">AGOSTO DE 2026</span>
-        <button onclick="moverSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
+        <button onclick="cambiarSemanaFlecha(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
+        <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">...</span>
+        <button onclick="cambiarSemanaFlecha(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&rsaquo;</button>
       </div>
       
-      <!-- Carrusel horizontal: Ocupa el 100% y alberga tarjetas calibradas a 1/7 exacto del ancho -->
+      <!-- Carrusel horizontal calibrado al 100% de la anchura dividida entre 7 días -->
       <div class="flex overflow-x-auto no-scrollbar py-2" id="semana-container"></div>
     </div>
 
@@ -245,7 +246,7 @@
     let headersSheet = [];
     let rowsSheet = [];
     
-    // Almacena la fecha seleccionada en cada momento (por defecto hoy)
+    // Inicia dinámicamente, se actualiza en cargarDatos()
     let fechaIsoSeleccionada = ""; 
     let servicioModal = "";
     let servicioDetalleActivo = "desayuno"; 
@@ -264,53 +265,53 @@
       const datosCache = localStorage.getItem("comedor_cache_rows");
       const headersCache = localStorage.getItem("comedor_cache_headers");
 
+      // Cargar caché si existe para pintar inmediato
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
         rowsSheet = JSON.parse(datosCache);
         
-        if (!fechaIsoSeleccionada) {
-          const hoy = new Date();
-          fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-        }
-        inicializarSelectUsuarios();
-        
-        if (!carruselInicializado) {
-          construirCarruselContinuo();
-          carruselInicializado = true;
-        }
-        
-        enfocarLunesDeFecha(fechaIsoSeleccionada, false);
-        actualizarEstadoVisualCarrusel();
-        renderizarVista();
+        iniciarEntorno();
       }
 
+      // Llamada real de fondo a Drive
       try {
         const res = await fetch(SCRIPT_URL + "?mode=getData");
         const json = await res.json();
         if (json.ok) {
           headersSheet = json.headers;
           rowsSheet = json.rows;
-
           localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
           localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
 
-          if (!fechaIsoSeleccionada) {
-            const hoy = new Date();
-            fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
-          }
-          inicializarSelectUsuarios();
-          
-          if (!carruselInicializado) {
-            construirCarruselContinuo();
-            carruselInicializado = true;
-          }
-          
-          enfocarLunesDeFecha(fechaIsoSeleccionada, false);
-          actualizarEstadoVisualCarrusel();
-          renderizarVista();
+          iniciarEntorno();
         }
       } catch (err) {
         console.warn("Sin conexión, usando datos en caché local:", err);
+      }
+    }
+
+    // Lógica maestra de inicio unificada
+    function iniciarEntorno() {
+      if (!fechaIsoSeleccionada) {
+        const hoy = new Date();
+        fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+      }
+      
+      inicializarSelectUsuarios();
+      
+      if (!carruselInicializado) {
+        construirCarruselContinuo();
+        carruselInicializado = true;
+        
+        // Retraso técnico mínimo para permitir que el DOM calcule los anchos de Lunes a Domingo y el scroll funcione al 100%
+        setTimeout(() => {
+          enfocarLunesDeFecha(fechaIsoSeleccionada, false); // "false" evita que veas la animación desde Julio hasta Hoy.
+          actualizarEstadoVisualCarrusel();
+          renderizarVista();
+        }, 80); 
+      } else {
+        actualizarEstadoVisualCarrusel();
+        renderizarVista();
       }
     }
 
@@ -318,9 +319,8 @@
       const hoy = new Date();
       fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
       
-      // Al pulsar Hoy, volvemos a la semana de hoy automáticamente
-      enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       actualizarEstadoVisualCarrusel();
+      enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
     }
 
@@ -340,24 +340,24 @@
     }
 
     // =========================================================================
-    // MOTOR DEL CARRUSEL: CONTINUO PERO PERFECTAMENTE DIVIDIDO EN 7 DÍAS
+    // MOTOR CARRUSEL: Rango amplio para scroll pero forzado a agruparse en 7 días
     // =========================================================================
-    
     function construirCarruselContinuo() {
       const container = document.getElementById("semana-container");
       const nombresDiasL = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
       let html = '';
 
-      // Generamos un bloque amplio (180 días) asegurándonos de que empieza en Lunes
+      // Generamos un bloque robusto de 147 días (21 semanas)
       const hoy = new Date();
-      let fechaBase = new Date(hoy);
-      fechaBase.setDate(fechaBase.getDate() - 90); 
+      let fechaBase = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+      fechaBase.setDate(fechaBase.getDate() - 70); 
       
+      // Ajuste milimétrico para empezar siempre en Lunes y no romper el bloque de 7
       let dOw = fechaBase.getDay();
       let diff = dOw === 0 ? -6 : 1 - dOw;
-      fechaBase.setDate(fechaBase.getDate() + diff); // Fuerza el inicio en Lunes
+      fechaBase.setDate(fechaBase.getDate() + diff); 
 
-      for (let i = 0; i < 180; i++) {
+      for (let i = 0; i < 147; i++) {
         const d = new Date(fechaBase);
         d.setDate(fechaBase.getDate() + i);
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -365,11 +365,11 @@
         let jsDay = d.getDay(); 
         let indexL = jsDay === 0 ? 6 : jsDay - 1; 
         let letraDia = nombresDiasL[indexL];
-        let isMonday = (indexL === 0);
 
-        // El wrapper ocupa el 14.28% exacto (1/7 del ancho total), por lo que SIEMPRE caben 7 días en pantalla
+        // El wrapper ocupa el 14.28% EXACTO (1/7 del ancho total).
+        // Así forzamos a que si haces scroll a un lunes, entren 7 días clavados en pantalla.
         html += `
-          <div id="day-wrap-${iso}" class="flex-shrink-0 ${isMonday ? 'is-monday' : ''}" style="width: calc(100% / 7);">
+          <div id="day-wrap-${iso}" class="flex-shrink-0" style="width: calc(100% / 7);">
             <div onclick="cambiarFecha('${iso}')" id="day-card-${iso}" class="day-card-item mx-0.5 md:mx-1 text-center cursor-pointer p-1.5 md:p-2 rounded-xl transition-all hover:bg-gray-100 text-gray-700 bg-gray-50/50 border border-gray-100">
               <div class="text-[9px] md:text-xs font-bold opacity-70">${letraDia}</div>
               <div class="text-sm md:text-base font-extrabold mt-0.5">${d.getDate()}</div>
@@ -380,7 +380,7 @@
       container.innerHTML = html;
     }
 
-    // Esta función encuadra la pantalla devolviendo la visión limpia de Lunes a Domingo
+    // Calcula de forma estricta dónde está el lunes de la fecha seleccionada y salta ahí
     function enfocarLunesDeFecha(isoStr, smooth = true) {
       const container = document.getElementById("semana-container");
       if (!container) return;
@@ -397,40 +397,41 @@
       const elementoLunes = document.getElementById(`day-wrap-${isoLunes}`);
 
       if (elementoLunes) {
-        container.scrollTo({ left: elementoLunes.offsetLeft, behavior: smooth ? 'smooth' : 'auto' });
+        if (!smooth) container.style.scrollBehavior = 'auto'; // Desactiva animación para el arranque
+        
+        container.scrollLeft = elementoLunes.offsetLeft;
+
+        if (!smooth) {
+          // Fuerza el recálculo y reactiva la animación fluida después de 50ms
+          void container.offsetWidth; 
+          setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 50);
+        }
       }
     }
 
-    // Flechas: Buscan el Lunes más cercano en pantalla y saltan al Lunes anterior o siguiente
-    function moverSemanaFlecha(dir) {
-      const container = document.getElementById("semana-container");
-      const currentScroll = container.scrollLeft;
-      const mondays = Array.from(document.querySelectorAll('.is-monday'));
+    // FLECHAS DE NAVEGACIÓN: Saltan de 7 en 7 días y enfocan de Lunes a Domingo.
+    function cambiarSemanaFlecha(dir) {
+      if (!fechaIsoSeleccionada) return;
       
-      if (mondays.length === 0) return;
-
-      // Buscar el Lunes visible actualmente
-      let currentMonday = mondays[0];
-      let minDiff = Infinity;
+      const [y, m, d] = fechaIsoSeleccionada.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      dateObj.setDate(dateObj.getDate() + (dir * 7)); 
       
-      mondays.forEach(m => {
-        const diff = Math.abs(m.offsetLeft - currentScroll);
-        if (diff < minDiff) {
-          minDiff = diff;
-          currentMonday = m;
-        }
-      });
+      fechaIsoSeleccionada = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
       
-      const currentIndex = mondays.indexOf(currentMonday);
-      let nextIndex = currentIndex + dir;
-      
-      if (nextIndex < 0) nextIndex = 0;
-      if (nextIndex >= mondays.length) nextIndex = mondays.length - 1;
-      
-      // Salta de forma limpia a encuadrar la siguiente semana de Lunes a Domingo
-      container.scrollTo({ left: mondays[nextIndex].offsetLeft, behavior: 'smooth' });
+      actualizarEstadoVisualCarrusel();
+      enfocarLunesDeFecha(fechaIsoSeleccionada, true); // Encuadra perfectamente la semana objetivo
+      renderizarVista();
     }
 
+    // CLIC EN EL DÍA: Marca el seleccionado, actualiza datos y NO HACE SCROLL.
+    function cambiarFecha(iso) {
+      fechaIsoSeleccionada = iso;
+      actualizarEstadoVisualCarrusel();
+      renderizarVista();
+    }
+
+    // VISUALES DEL CARRUSEL
     function actualizarEstadoVisualCarrusel() {
       const tarjetas = document.querySelectorAll('.day-card-item');
       tarjetas.forEach(t => {
@@ -446,13 +447,6 @@
       const selDate = new Date(sy, sm - 1, sd);
       const mesNombre = selDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
       document.getElementById("mes-anio-label").textContent = mesNombre.toUpperCase();
-    }
-
-    function cambiarFecha(iso) {
-      fechaIsoSeleccionada = iso;
-      actualizarEstadoVisualCarrusel();
-      // ¡AQUÍ ESTÁ LA CLAVE! Al elegir fecha, no hacemos ScrollTo. El carrusel no se mueve.
-      renderizarVista();
     }
 
     // =========================================================================
