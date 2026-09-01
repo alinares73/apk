@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Comedor Ciudadela</title>
+  
   <!-- Enlace al Manifiesto PWA para el icono y modo app -->
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Etiquetas específicas para forzar el icono y modo app en iOS (iPad/iPhone) -->
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <meta name="theme-color" content="#264334">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -268,7 +275,11 @@
 
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdoxO8mbgGnosNNr2Kq9fRIV6Pm2VYFTZlt_nw0hzsHKb35vNsg04pDgxq8zvZaOk7/exec";
+    // =========================================================================
+    // ⚠️ ¡ATENCIÓN! Pega aquí la URL de tu nueva hoja "Comensales Ciudadela"
+    // =========================================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxdoxO8mbgGnosNNr2Kq9fRIV6Pm2VYFTZlt_nw0hzsHKb35vNsg04pDgxq8zvZaOk7/exec";
+    
     let headersSheet = [];
     let rowsSheet = [];
     
@@ -287,6 +298,7 @@
     let focoAusencia = "inicio";
 
     async function cargarDatos() {
+      // CACHÉ ACTUALIZADA A LA NUEVA HOJA
       const datosCache = localStorage.getItem("comensales_cache_rows");
       const headersCache = localStorage.getItem("comensales_cache_headers");
 
@@ -304,6 +316,7 @@
           rowsSheet = json.rows;
           localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
           localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+
           iniciarEntorno();
         }
       } catch (err) {
@@ -342,13 +355,10 @@
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
 
-      // ==========================================================
-      // NUEVO: EFECTO REFRESCO (Descarga datos frescos de Drive)
-      // ==========================================================
+      // EFECTO REFRESCO: Descarga datos frescos de Drive
       const btnHoy = document.querySelector("header button");
       const textoOriginal = btnHoy.innerText;
       
-      // Feedback visual para que el usuario sepa que está actualizando
       btnHoy.innerText = "↻..."; 
       
       fetch(SCRIPT_URL + "?mode=getData")
@@ -357,11 +367,11 @@
           if (json.ok) {
             headersSheet = json.headers;
             rowsSheet = json.rows;
-            localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
-            localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-            renderizarVista(); // Redibuja con los datos actualizados de los demás
+            localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+            localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+            renderizarVista(); 
           }
-          btnHoy.innerText = "HOY"; // Vuelve a la normalidad
+          btnHoy.innerText = "HOY"; 
         })
         .catch(err => {
           console.warn("Error al refrescar los datos:", err);
@@ -385,7 +395,7 @@
     }
 
     // =========================================================================
-    // MOTOR CARRUSEL: Tarjetas matemáticas para encajar exactamente 7 días
+    // MOTOR CARRUSEL
     // =========================================================================
     function construirCarruselContinuo() {
       const container = document.getElementById("semana-container");
@@ -487,7 +497,7 @@
     }
 
     // =========================================================================
-    // MODALES Y OBSERVACIONES DINÁMICAS
+    // MODALES Y OBSERVACIONES
     // =========================================================================
 
     function abrirModalEstado(meal) {
@@ -1027,13 +1037,12 @@
     }
 
     // =========================================================================
-    // GUARDADO PRINCIPAL CON RETROALIMENTACIÓN VISUAL SOSTENIDA
+    // GUARDADO PRINCIPAL
     // =========================================================================
     async function guardarCambiosPendientes() {
       const keys = Object.keys(cambiosPendientes);
       if (keys.length === 0) return;
 
-      // 1. Mostrar estado de guardado bloqueando la interfaz para que el usuario sepa que está trabajando
       const btnGuardarSup = document.querySelector("#contenedor-btn-guardar-sup button");
       const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
       const syncStatus = document.getElementById("sync-status");
@@ -1043,7 +1052,7 @@
       btnGuardarSup.className = "w-full bg-gray-100 text-gray-500 font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base transition-colors cursor-wait";
       btnIcono.textContent = "⏳";
       btnTxtSup.textContent = "Guardando en Drive...";
-      // syncStatus.textContent = "guardando cambios..."; 
+      syncStatus.textContent = "guardando cambios...";
       syncStatus.className = "text-[11px] text-gray-400 font-semibold tracking-tight";
 
       let cambiosPorPersona = {};
@@ -1056,12 +1065,12 @@
         } else {
            const [person, fecha, meal] = k.split('|');
            if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
+           cambiosPorPersona[person].push(`${fecha}|meal|${cambiosPendientes[k]}`);
            cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
         }
       });
 
       try {
-        // Enviar celdas normales
         for (const person in cambiosPorPersona) {
           const cellsStr = cambiosPorPersona[person].join(';');
           await fetch(SCRIPT_URL, {
@@ -1071,7 +1080,6 @@
           });
         }
 
-        // Enviar Observaciones agrupadas
         for (const fecha in obsPorFecha) {
           const notas = obsPorFecha[fecha];
           await fetch(SCRIPT_URL, {
@@ -1081,7 +1089,6 @@
           });
         }
 
-        // 2. LA MAGIA: Inyectamos en caché local ANTES de vaciar la cola para evitar parpadeos
         keys.forEach(k => {
           if (!k.startsWith("OBS_ARRAY|")) {
             const [person, fecha, meal] = k.split('|');
@@ -1123,10 +1130,8 @@
         
         localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
         
-        // Vaciamos los cambios ahora que ya están consolidados localmente
         cambiosPendientes = {};
         
-        // 3. Restaurar visuales originales (el botón verde desaparecerá inmediatamente al llamar a actualizarEstado)
         btnGuardarSup.disabled = false;
         btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
         btnIcono.textContent = "💾";
@@ -1135,7 +1140,6 @@
         actualizarEstadoBotonGuardarSup();
         renderizarVista();
 
-        // 4. Doble validación silenciosa en background para asegurar que la copia final de Drive coincide al 100%
         fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
           if (j.ok) {
             headersSheet = j.headers;
@@ -1153,7 +1157,6 @@
         syncStatus.className = "text-xs text-red-500 font-bold";
         btnGuardarSup.disabled = false;
         
-        // Retornamos el botón a su estado jugable en rojo/gris unos segundos si ha fallado la red
         setTimeout(() => {
            btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
            btnIcono.textContent = "💾";
@@ -1164,6 +1167,22 @@
     }
 
     cargarDatos();
+  </script>
+
+  <!-- ================= EL EXORCISMO DEL SERVICE WORKER VIEJO ================= -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('FANTASMA ELIMINADO: Service Worker antiguo desregistrado');
+        }
+      }).then(() => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Nuevo motor PWA registrado con éxito', reg))
+          .catch(err => console.warn('Error al registrar', err));
+      });
+    }
   </script>
 </body>
 </html>
