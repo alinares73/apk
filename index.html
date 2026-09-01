@@ -268,7 +268,7 @@
 
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP8EiD6tIiEJQQBvEk8I4Vg647xQoNNkY60Pneh1nVjyECKp-MbzQvjjNcBKEASZExLQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdoxO8mbgGnosNNr2Kq9fRIV6Pm2VYFTZlt_nw0hzsHKb35vNsg04pDgxq8zvZaOk7/exec";
     let headersSheet = [];
     let rowsSheet = [];
     
@@ -287,8 +287,8 @@
     let focoAusencia = "inicio";
 
     async function cargarDatos() {
-      const datosCache = localStorage.getItem("comedor_cache_rows");
-      const headersCache = localStorage.getItem("comedor_cache_headers");
+      const datosCache = localStorage.getItem("comensales_cache_rows");
+      const headersCache = localStorage.getItem("comensales_cache_headers");
 
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
@@ -302,9 +302,8 @@
         if (json.ok) {
           headersSheet = json.headers;
           rowsSheet = json.rows;
-          localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
-          localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
-
+          localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+          localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
           iniciarEntorno();
         }
       } catch (err) {
@@ -981,8 +980,8 @@
               if (j.ok) {
                 headersSheet = j.headers;
                 rowsSheet = j.rows;
-                localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
-                localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+                localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+                localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
                 renderizarVista();
               }
             });
@@ -1096,7 +1095,7 @@
            }
         }
         
-        localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+        localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
         
         // Vaciamos los cambios ahora que ya están consolidados localmente
         cambiosPendientes = {};
@@ -1115,8 +1114,8 @@
           if (j.ok) {
             headersSheet = j.headers;
             rowsSheet = j.rows;
-            localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
-            localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+            localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+            localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
           }
         });
 
