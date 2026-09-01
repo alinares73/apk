@@ -63,7 +63,7 @@
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
-    <!-- Cabecera Fecha y Usuario con Botón de Ajustes -->
+    <!-- Cabecera Fecha y Usuario Compacta -->
     <div class="flex justify-between items-center my-4">
       <div class="flex items-center space-x-3 md:space-x-4">
         <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
@@ -73,16 +73,17 @@
         </div>
       </div>
       
-      <!-- Selector de Iniciales + Botón Engranaje -->
-      <div class="text-right flex items-center justify-end space-x-2">
-        <div>
-          <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 block uppercase">Iniciales</span>
-          <select id="user-select" onchange="verificarCambioUsuarioSelect(this)" class="font-extrabold text-lg md:text-xl text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
+      <!-- Selector de Iniciales Compacto y Alineado -->
+      <div class="flex flex-col items-end">
+        <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 uppercase mb-0.5">Iniciales</span>
+        <div class="flex items-center space-x-1.5 bg-white/80 border border-gray-200/90 px-3 py-1.5 rounded-2xl shadow-sm">
+          <span class="text-sm">👤</span>
+          <select id="user-select" onchange="verificarCambioUsuarioSelect(this)" class="font-extrabold text-base md:text-lg text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
           </select>
+          <button onclick="abrirModalSeleccionUsuarioInicial()" class="w-7 h-7 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xs shadow-sm active:scale-95 transition-all ml-1" title="Cambiar iniciales">
+            ⚙️
+          </button>
         </div>
-        <button onclick="abrirModalSeleccionUsuarioInicial()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm shadow-sm active:scale-95 transition-all" title="Cambiar iniciales">
-          ⚙️
-        </button>
       </div>
     </div>
 
