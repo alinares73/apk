@@ -63,7 +63,7 @@
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
-    <!-- Cabecera Fecha y Usuario Compacta -->
+    <!-- Cabecera Fecha y Usuario Compacta y Alineada a la Derecha -->
     <div class="flex justify-between items-center my-4">
       <div class="flex items-center space-x-3 md:space-x-4">
         <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
@@ -73,23 +73,22 @@
         </div>
       </div>
       
-      <!-- Selector de Iniciales Compacto y Alineado -->
+      <!-- Selector de Iniciales Compacto a la Derecha -->
       <div class="flex flex-col items-end">
         <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 uppercase mb-0.5">Iniciales</span>
-        <div class="flex items-center space-x-1.5 bg-white/80 border border-gray-200/90 px-3 py-1.5 rounded-2xl shadow-sm">
-          <span class="text-sm">👤</span>
-          <select id="user-select" onchange="verificarCambioUsuarioSelect(this)" class="font-extrabold text-base md:text-lg text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
+        <div class="flex items-center space-x-1 bg-white/80 border border-gray-200/90 pl-3 pr-1.5 py-1 rounded-2xl shadow-sm">
+          <select id="user-select" onchange="verificarCambioUsuarioSelect(this)" class="font-extrabold text-base md:text-lg text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right pr-1">
           </select>
-          <button onclick="abrirModalSeleccionUsuarioInicial()" class="w-7 h-7 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xs shadow-sm active:scale-95 transition-all ml-1" title="Cambiar iniciales">
+          <button onclick="abrirModalSeleccionUsuarioInicial()" class="w-7 h-7 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xs shadow-sm active:scale-95 transition-all" title="Configurar mis iniciales">
             ⚙️
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Tú este día -->
+    <!-- Tú este día / Persona seleccionada -->
     <div class="mt-4">
-      <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Tú este día (Pulsa para cambiar)</h2>
+      <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2" id="label-tu-este-dia">Tú este día (Pulsa para cambiar)</h2>
       <div class="grid grid-cols-3 gap-2.5">
         <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
           <span class="text-xs md:text-sm opacity-85 block mb-1">☼ Desay.</span>
@@ -279,12 +278,12 @@
     </div>
   </div>
 
-  <!-- Modal de Bienvenida para Seleccionar Iniciales por Primera Vez o Cambio -->
+  <!-- Modal de Selección/Cambio de Iniciales Propias -->
   <div id="modal-usuario-inicial" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl text-center">
       <div class="text-4xl mb-3">🏠</div>
-      <h3 class="font-extrabold text-gray-900 text-xl mb-1">Configurar Iniciales</h3>
-      <p class="text-xs text-gray-500 mb-6">Por favor, selecciona tus iniciales para personalizar esta aplicación en tu dispositivo.</p>
+      <h3 class="font-extrabold text-gray-900 text-xl mb-1">Tus Iniciales</h3>
+      <p class="text-xs text-gray-500 mb-6">Selecciona cuáles son tus iniciales en este dispositivo.</p>
       
       <div class="mb-6">
         <select id="select-usuario-inicial" class="w-full bg-gray-50 border-2 border-forest-light font-extrabold text-xl text-gray-900 p-4 rounded-2xl outline-none cursor-pointer shadow-sm text-center">
@@ -300,7 +299,7 @@
 
   <script>
     // =========================================================================
-    // URL DE TU NUEVO GOOGLE APPS SCRIPT (COMENSALES CIUDADELA)
+    // URL DE TU GOOGLE APPS SCRIPT (COMENSALES CIUDADELA)
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdoxO8mbgGnosNNr2Kq9fRIV6Pm2VYFTZlt_nw0hzsHKb35vNsg04pDgxq8zvZaOk7/exec";
     
@@ -312,7 +311,11 @@
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
     let carruselInicializado = false;
-    let usuarioActual = "";
+    
+    // usuarioPropietario: Las iniciales configuradas de este dispositivo (ej: "ALR")
+    let usuarioPropietario = "";
+    // usuarioVisualizando: La persona seleccionada en el menú desplegable en este momento
+    let usuarioVisualizando = "";
 
     let ausenciaAnio = 2026;
     let ausenciaMes = 7; 
@@ -355,10 +358,11 @@
       }
       
       const personas = rowsSheet.map(r => r[1]).filter(p => p);
-      const usuarioGuardado = localStorage.getItem("comedor_usuario_activo");
+      const guardado = localStorage.getItem("comedor_usuario_activo");
 
-      if (usuarioGuardado && personas.includes(usuarioGuardado)) {
-        usuarioActual = usuarioGuardado;
+      if (guardado && personas.includes(guardado)) {
+        usuarioPropietario = guardado;
+        if (!usuarioVisualizando) usuarioVisualizando = usuarioPropietario;
       } else {
         abrirModalSeleccionUsuarioInicial();
         return; 
@@ -391,16 +395,17 @@
       const selectModal = document.getElementById("select-usuario-inicial");
       const personas = rowsSheet.map(r => r[1]).filter(p => p);
       selectModal.innerHTML = personas.map(p => `<option value="${p}">${p}</option>`).join("");
-      if (usuarioActual && personas.includes(usuarioActual)) {
-        selectModal.value = usuarioActual;
+      if (usuarioPropietario && personas.includes(usuarioPropietario)) {
+        selectModal.value = usuarioPropietario;
       }
     }
 
     function guardarUsuarioInicial() {
       const selectModal = document.getElementById("select-usuario-inicial");
-      usuarioActual = selectModal.value;
+      usuarioPropietario = selectModal.value;
+      usuarioVisualizando = usuarioPropietario; // Al configurar, volvemos a ver nuestras iniciales
       
-      localStorage.setItem("comedor_usuario_activo", usuarioActual);
+      localStorage.setItem("comedor_usuario_activo", usuarioPropietario);
       document.getElementById("modal-usuario-inicial").classList.add("hidden");
       
       inicializarSelectUsuarios();
@@ -422,10 +427,10 @@
     function verificarCambioUsuarioSelect(selectElement) {
       if (selectElement.value === "CAMBIAR_PERFIL") {
         abrirModalSeleccionUsuarioInicial();
-        selectElement.value = usuarioActual;
+        selectElement.value = usuarioVisualizando;
       } else {
-        usuarioActual = selectElement.value;
-        localStorage.setItem("comedor_usuario_activo", usuarioActual);
+        // Simplemente cambiamos de persona a visualizar / rellenar
+        usuarioVisualizando = selectElement.value;
         renderizarVista();
       }
     }
@@ -464,20 +469,20 @@
       const selectAus = document.getElementById("ausencia-user-select");
       const personas = rowsSheet.map(r => r[1]).filter(p => p);
       
+      // EL ICONO 👤 SOLO SE MUESTRA EN TUS INICIALES PROPIETARIAS
       let optionsHtml = personas.map(p => {
-        const esActivo = (p === usuarioActual);
-        return `<option value="${p}" ${esActivo ? 'selected' : ''}>${esActivo ? '👤 ' + p : p}</option>`;
+        const esMio = (p === usuarioPropietario);
+        const textoEtiqueta = esMio ? `👤 ${p}` : p;
+        return `<option value="${p}">${textoEtiqueta}</option>`;
       }).join("");
 
       optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️ Cambiar iniciales...</option>`;
 
       select.innerHTML = optionsHtml;
-      if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p}</option>`).join("");
+      if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p === usuarioPropietario ? '👤 ' + p : p}</option>`).join("");
 
-      if (usuarioActual && personas.includes(usuarioActual)) {
-        select.value = usuarioActual;
-      }
-      if (selectAus) selectAus.value = usuarioActual;
+      select.value = usuarioVisualizando || usuarioPropietario;
+      if (selectAus) selectAus.value = usuarioVisualizando || usuarioPropietario;
       
       actualizarTituloAusencias();
     }
@@ -599,7 +604,7 @@
 
     function asignarEstadoLocal(valNuevo) {
       cerrarModal();
-      const clave = `${usuarioActual}|${fechaIsoSeleccionada}|${servicioModal}`;
+      const clave = `${usuarioVisualizando}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
       actualizarEstadoBotonGuardarSup();
       renderizarVista();
@@ -735,12 +740,20 @@
 
     function renderizarVista() {
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
-      const filaPersona = rowsSheet.find(r => r[1] === usuarioActual);
+      const filaPersona = rowsSheet.find(r => r[1] === usuarioVisualizando);
+
+      // Actualizar el título dinámicamente si vemos a otro usuario
+      const labelTuEsteDia = document.getElementById("label-tu-este-dia");
+      if (usuarioVisualizando === usuarioPropietario) {
+        labelTuEsteDia.textContent = "Tú este día (Pulsa para cambiar)";
+      } else {
+        labelTuEsteDia.textContent = `${usuarioVisualizando} este día (Pulsa para cambiar)`;
+      }
 
       if (colIndex !== -1 && filaPersona) {
-        const vDesay = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
-        const vAlm = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
-        const vCena = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
+        const vDesay = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
+        const vAlm = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
+        const vCena = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
 
         document.getElementById("tu-desayuno").textContent = formatearVisual(vDesay);
         document.getElementById("tu-almuerzo").textContent = formatearVisual(vAlm);
@@ -897,7 +910,7 @@
       document.getElementById("pantalla-principal").classList.add("hidden");
       document.getElementById("pantalla-ausencias").classList.remove("hidden");
       
-      document.getElementById("ausencia-user-select").value = usuarioActual;
+      document.getElementById("ausencia-user-select").value = usuarioVisualizando || usuarioPropietario;
       actualizarTituloAusencias();
 
       ausenciaInicioIso = fechaIsoSeleccionada;
