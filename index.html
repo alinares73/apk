@@ -341,6 +341,32 @@
       actualizarEstadoVisualCarrusel();
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
+
+      // ==========================================================
+      // NUEVO: EFECTO REFRESCO (Descarga datos frescos de Drive)
+      // ==========================================================
+      const btnHoy = document.querySelector("header button");
+      const textoOriginal = btnHoy.innerText;
+      
+      // Feedback visual para que el usuario sepa que está actualizando
+      btnHoy.innerText = "↻..."; 
+      
+      fetch(SCRIPT_URL + "?mode=getData")
+        .then(res => res.json())
+        .then(json => {
+          if (json.ok) {
+            headersSheet = json.headers;
+            rowsSheet = json.rows;
+            localStorage.setItem("comedor_cache_headers", JSON.stringify(headersSheet));
+            localStorage.setItem("comedor_cache_rows", JSON.stringify(rowsSheet));
+            renderizarVista(); // Redibuja con los datos actualizados de los demás
+          }
+          btnHoy.innerText = "HOY"; // Vuelve a la normalidad
+        })
+        .catch(err => {
+          console.warn("Error al refrescar los datos:", err);
+          btnHoy.innerText = "HOY";
+        });
     }
 
     function inicializarSelectUsuarios() {
