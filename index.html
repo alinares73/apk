@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.json">
   
   <!-- Etiquetas específicas para forzar el icono y modo app en iOS (iPad/iPhone) -->
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-512.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
@@ -63,7 +63,7 @@
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
-    <!-- Cabecera Fecha y Usuario -->
+    <!-- Cabecera Fecha y Usuario con Botón de Ajustes -->
     <div class="flex justify-between items-center my-4">
       <div class="flex items-center space-x-3 md:space-x-4">
         <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
@@ -72,10 +72,17 @@
           <span id="mes-txt" class="text-base md:text-lg font-extrabold text-gray-900 uppercase tracking-tight">---</span>
         </div>
       </div>
-      <div class="text-right">
-        <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 block uppercase">Iniciales</span>
-        <select id="user-select" onchange="renderizarVista()" class="font-extrabold text-lg md:text-xl text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
-        </select>
+      
+      <!-- Selector de Iniciales + Botón Engranaje -->
+      <div class="text-right flex items-center justify-end space-x-2">
+        <div>
+          <span class="text-[10px] md:text-xs tracking-widest font-bold text-gray-400 block uppercase">Iniciales</span>
+          <select id="user-select" onchange="verificarCambioUsuarioSelect(this)" class="font-extrabold text-lg md:text-xl text-gray-900 bg-transparent cursor-pointer outline-none border-none text-right">
+          </select>
+        </div>
+        <button onclick="abrirModalSeleccionUsuarioInicial()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm shadow-sm active:scale-95 transition-all" title="Cambiar iniciales">
+          ⚙️
+        </button>
       </div>
     </div>
 
@@ -175,7 +182,7 @@
     <div class="flex items-center justify-between pt-2 pb-4 border-b border-gray-200 mb-4">
       <div class="flex items-center space-x-3">
         <button onclick="cerrarPantallaAusencias()" class="text-2xl font-bold text-gray-800">&times;</button>
-        <h1 class="text-xl md:text-2xl font-extrabold text-gray-900" id="titulo-pantalla-ausencias">Ausencias de ALR</h1>
+        <h1 class="text-xl md:text-2xl font-extrabold text-gray-900" id="titulo-pantalla-ausencias">Ausencias</h1>
       </div>
     </div>
 
@@ -217,7 +224,7 @@
     <div class="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 shadow-sm mb-6">
       <div class="flex items-center justify-between mb-4">
         <button onclick="cambiarMesCalendario(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&lsaquo;</button>
-        <span id="cal-mes-anio-label" class="text-sm md:text-base font-extrabold uppercase text-gray-800">AGOSTO DE 2026</span>
+        <span id="cal-mes-anio-label" class="text-sm md:text-base font-extrabold uppercase text-gray-800">...</span>
         <button onclick="cambiarMesCalendario(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 font-bold text-gray-700">&rsaquo;</button>
       </div>
       <div class="grid grid-cols-7 gap-1.5 text-center text-xs md:text-sm font-bold text-gray-400 mb-2">
@@ -262,9 +269,7 @@
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[85vh]">
       <h3 class="font-extrabold text-gray-900 text-lg mb-4 text-center">Observaciones del día</h3>
       
-      <div id="lista-observaciones-inputs" class="flex-1 overflow-y-auto space-y-3 mb-5 no-scrollbar">
-        <!-- Las áreas de texto se inyectarán aquí -->
-      </div>
+      <div id="lista-observaciones-inputs" class="flex-1 overflow-y-auto space-y-3 mb-5 no-scrollbar"></div>
       
       <div class="flex space-x-3 mt-auto">
         <button onclick="cerrarModalObservaciones()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold text-sm md:text-base transition-colors hover:bg-gray-200">Cancelar</button>
@@ -273,12 +278,30 @@
     </div>
   </div>
 
+  <!-- Modal de Bienvenida para Seleccionar Iniciales por Primera Vez o Cambio -->
+  <div id="modal-usuario-inicial" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl text-center">
+      <div class="text-4xl mb-3">🏠</div>
+      <h3 class="font-extrabold text-gray-900 text-xl mb-1">Configurar Iniciales</h3>
+      <p class="text-xs text-gray-500 mb-6">Por favor, selecciona tus iniciales para personalizar esta aplicación en tu dispositivo.</p>
+      
+      <div class="mb-6">
+        <select id="select-usuario-inicial" class="w-full bg-gray-50 border-2 border-forest-light font-extrabold text-xl text-gray-900 p-4 rounded-2xl outline-none cursor-pointer shadow-sm text-center">
+        </select>
+      </div>
+
+      <button onclick="guardarUsuarioInicial()" class="w-full bg-forest text-white font-extrabold py-4 rounded-2xl text-base shadow-lg active:scale-95 transition-transform">
+        Guardar y continuar
+      </button>
+    </div>
+  </div>
+
 
   <script>
     // =========================================================================
-    // ⚠️ ¡ATENCIÓN! Pega aquí la URL de tu nueva hoja "Comensales Ciudadela"
+    // URL DE TU GOOGLE APPS SCRIPT
     // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdoxO8mbgGnosNNr2Kq9fRIV6Pm2VYFTZlt_nw0hzsHKb35vNsg04pDgxq8zvZaOk7/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP8EiD6tIiEJQQBvEk8I4Vg647xQoNNkY60Pneh1nVjyECKp-MbzQvjjNcBKEASZExLQ/exec";
     
     let headersSheet = [];
     let rowsSheet = [];
@@ -288,6 +311,7 @@
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
     let carruselInicializado = false;
+    let usuarioActual = "";
 
     let ausenciaAnio = 2026;
     let ausenciaMes = 7; 
@@ -298,7 +322,6 @@
     let focoAusencia = "inicio";
 
     async function cargarDatos() {
-      // CACHÉ ACTUALIZADA A LA NUEVA HOJA
       const datosCache = localStorage.getItem("comensales_cache_rows");
       const headersCache = localStorage.getItem("comensales_cache_headers");
 
@@ -330,6 +353,16 @@
         fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
       }
       
+      const personas = rowsSheet.map(r => r[1]).filter(p => p);
+      const usuarioGuardado = localStorage.getItem("comedor_usuario_activo");
+
+      if (usuarioGuardado && personas.includes(usuarioGuardado)) {
+        usuarioActual = usuarioGuardado;
+      } else {
+        abrirModalSeleccionUsuarioInicial();
+        return; 
+      }
+
       inicializarSelectUsuarios();
       
       if (!carruselInicializado) {
@@ -347,6 +380,55 @@
       }
     }
 
+    function abrirModalSeleccionUsuarioInicial() {
+      const modal = document.getElementById("modal-usuario-inicial");
+      if (modal) modal.classList.remove("hidden");
+      poblarSelectModalInicial();
+    }
+
+    function poblarSelectModalInicial() {
+      const selectModal = document.getElementById("select-usuario-inicial");
+      const personas = rowsSheet.map(r => r[1]).filter(p => p);
+      selectModal.innerHTML = personas.map(p => `<option value="${p}">${p}</option>`).join("");
+      if (usuarioActual && personas.includes(usuarioActual)) {
+        selectModal.value = usuarioActual;
+      }
+    }
+
+    function guardarUsuarioInicial() {
+      const selectModal = document.getElementById("select-usuario-inicial");
+      usuarioActual = selectModal.value;
+      
+      localStorage.setItem("comedor_usuario_activo", usuarioActual);
+      document.getElementById("modal-usuario-inicial").classList.add("hidden");
+      
+      inicializarSelectUsuarios();
+      
+      if (!carruselInicializado) {
+        construirCarruselContinuo();
+        carruselInicializado = true;
+        setTimeout(() => {
+          enfocarLunesDeFecha(fechaIsoSeleccionada, false); 
+          actualizarEstadoVisualCarrusel();
+          renderizarVista();
+        }, 100);
+      } else {
+        actualizarEstadoVisualCarrusel();
+        renderizarVista();
+      }
+    }
+
+    function verificarCambioUsuarioSelect(selectElement) {
+      if (selectElement.value === "CAMBIAR_PERFIL") {
+        abrirModalSeleccionUsuarioInicial();
+        selectElement.value = usuarioActual;
+      } else {
+        usuarioActual = selectElement.value;
+        localStorage.setItem("comedor_usuario_activo", usuarioActual);
+        renderizarVista();
+      }
+    }
+
     function irAlDiaHoy() {
       const hoy = new Date();
       fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
@@ -355,10 +437,7 @@
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
 
-      // EFECTO REFRESCO: Descarga datos frescos de Drive
       const btnHoy = document.querySelector("header button");
-      const textoOriginal = btnHoy.innerText;
-      
       btnHoy.innerText = "↻..."; 
       
       fetch(SCRIPT_URL + "?mode=getData")
@@ -382,15 +461,23 @@
     function inicializarSelectUsuarios() {
       const select = document.getElementById("user-select");
       const selectAus = document.getElementById("ausencia-user-select");
-      const actual = select.value || "ALR";
       const personas = rowsSheet.map(r => r[1]).filter(p => p);
       
-      const optionsHtml = personas.map(p => `<option value="${p}">${p}</option>`).join("");
-      select.innerHTML = optionsHtml;
-      selectAus.innerHTML = optionsHtml;
+      let optionsHtml = personas.map(p => {
+        const esActivo = (p === usuarioActual);
+        return `<option value="${p}" ${esActivo ? 'selected' : ''}>${esActivo ? '👤 ' + p : p}</option>`;
+      }).join("");
 
-      select.value = personas.includes(actual) ? actual : (personas[0] || "ALR");
-      selectAus.value = select.value;
+      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️ Cambiar iniciales...</option>`;
+
+      select.innerHTML = optionsHtml;
+      if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p}</option>`).join("");
+
+      if (usuarioActual && personas.includes(usuarioActual)) {
+        select.value = usuarioActual;
+      }
+      if (selectAus) selectAus.value = usuarioActual;
+      
       actualizarTituloAusencias();
     }
 
@@ -499,7 +586,6 @@
     // =========================================================================
     // MODALES Y OBSERVACIONES
     // =========================================================================
-
     function abrirModalEstado(meal) {
       servicioModal = meal;
       document.getElementById("modal-titulo").textContent = `Estado para ${meal}`;
@@ -512,8 +598,7 @@
 
     function asignarEstadoLocal(valNuevo) {
       cerrarModal();
-      const usuarioSel = document.getElementById("user-select").value;
-      const clave = `${usuarioSel}|${fechaIsoSeleccionada}|${servicioModal}`;
+      const clave = `${usuarioActual}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
       actualizarEstadoBotonGuardarSup();
       renderizarVista();
@@ -552,7 +637,7 @@
              obsArray.push(val);
            }
          } else {
-           container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones para este día en la hoja de cálculo.</p>`;
+           container.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No hay sección de observaciones para este día.</p>`;
            document.getElementById("modal-observaciones").classList.remove("hidden");
            return;
          }
@@ -611,7 +696,6 @@
     // =========================================================================
     // VISUALIZACIÓN PRINCIPAL Y DESGLOSES
     // =========================================================================
-
     function seleccionarServicioDetalle(servicio) {
       servicioDetalleActivo = servicio; 
       actualizarEstilosTarjetasResumen();
@@ -649,14 +733,13 @@
     }
 
     function renderizarVista() {
-      const usuarioSel = document.getElementById("user-select").value;
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
-      const filaPersona = rowsSheet.find(r => r[1] === usuarioSel);
+      const filaPersona = rowsSheet.find(r => r[1] === usuarioActual);
 
       if (colIndex !== -1 && filaPersona) {
-        const vDesay = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
-        const vAlm = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
-        const vCena = cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioSel}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
+        const vDesay = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
+        const vAlm = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
+        const vCena = cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioActual}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
 
         document.getElementById("tu-desayuno").textContent = formatearVisual(vDesay);
         document.getElementById("tu-almuerzo").textContent = formatearVisual(vAlm);
@@ -806,12 +889,14 @@
       return val;
     }
 
+    // =========================================================================
+    // GESTIÓN DE AUSENCIAS
+    // =========================================================================
     function abrirPantallaAusencias() {
       document.getElementById("pantalla-principal").classList.add("hidden");
       document.getElementById("pantalla-ausencias").classList.remove("hidden");
       
-      const userPrincipal = document.getElementById("user-select").value;
-      document.getElementById("ausencia-user-select").value = userPrincipal;
+      document.getElementById("ausencia-user-select").value = usuarioActual;
       actualizarTituloAusencias();
 
       ausenciaInicioIso = fechaIsoSeleccionada;
@@ -1129,7 +1214,6 @@
         }
         
         localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-        
         cambiosPendientes = {};
         
         btnGuardarSup.disabled = false;
