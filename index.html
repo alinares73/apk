@@ -476,7 +476,7 @@
         return `<option value="${p}">${textoEtiqueta}</option>`;
       }).join("");
 
-      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️ Cambiar iniciales...</option>`;
+      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️</option>`;
 
       select.innerHTML = optionsHtml;
       if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p === usuarioPropietario ? '👤 ' + p : p}</option>`).join("");
