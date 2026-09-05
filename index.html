@@ -126,17 +126,17 @@
           <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-[#264334] text-white rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]">
             <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">☼</span> DESAY</span>
             <span class="text-5xl md:text-6xl font-black text-white my-auto" id="tot-desayuno">0</span>
-            <div id="sub-tot-desayuno" class="text-xs md:text-sm font-bold text-white/90 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+            <div id="sub-tot-desayuno" class="text-sm md:text-base font-extrabold text-white/90 mt-1 min-h-[20px] leading-tight text-center w-full break-words"></div>
           </div>
           <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]">
             <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x1F374;</span> ALM</span>
             <span class="text-5xl md:text-6xl font-black text-gray-900 my-auto" id="tot-almuerzo">0</span>
-            <div id="sub-tot-almuerzo" class="text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+            <div id="sub-tot-almuerzo" class="text-sm md:text-base font-extrabold text-gray-500 mt-1 min-h-[20px] leading-tight text-center w-full break-words"></div>
           </div>
           <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]">
             <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x263E;</span> CENA</span>
             <span class="text-5xl md:text-6xl font-black text-gray-900 my-auto" id="tot-cena">0</span>
-            <div id="sub-tot-cena" class="text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+            <div id="sub-tot-cena" class="text-sm md:text-base font-extrabold text-gray-500 mt-1 min-h-[20px] leading-tight text-center w-full break-words"></div>
           </div>
         </div>
       </div>
@@ -722,7 +722,7 @@
       const claseInactiva = "bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]";
       const headerInactivo = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
       const numberInactivo = "text-5xl md:text-6xl font-black text-gray-900 my-auto";
-      const subInactivo = "text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words";
+      const subInactivo = "text-sm md:text-base font-extrabold text-gray-500 mt-1 min-h-[20px] leading-tight text-center w-full break-words";
 
       cardDesay.className = claseInactiva;
       cardAlm.className = claseInactiva;
@@ -750,7 +750,7 @@
       cardActiva.className = claseActiva;
       cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
       cardActiva.querySelector("span:nth-child(2)").className = "text-5xl md:text-6xl font-black text-white my-auto";
-      cardActiva.querySelector("div:last-child").className = "text-xs md:text-sm font-bold text-white/90 mt-1 min-h-[18px] leading-tight text-center w-full break-words";
+      cardActiva.querySelector("div:last-child").className = "text-sm md:text-base font-extrabold text-white/90 mt-1 min-h-[20px] leading-tight text-center w-full break-words";
     }
 
     function renderizarVista() {
