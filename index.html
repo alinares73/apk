@@ -90,16 +90,16 @@
     <div class="mt-4">
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2" id="label-tu-este-dia">Tú este día (Pulsa para cambiar)</h2>
       <div class="grid grid-cols-3 gap-2.5">
-        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs md:text-sm opacity-85 block mb-1">☼ Desay.</span>
+        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col justify-center">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1">☼ Desayuno</span>
           <span class="text-xl md:text-2xl font-bold" id="tu-desayuno">--</span>
         </div>
-        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs md:text-sm opacity-85 block mb-1">&#x1F374; Alm.</span>
+        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col justify-center">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1">&#x1F374; Almuerzo</span>
           <span class="text-xl md:text-2xl font-bold" id="tu-almuerzo">--</span>
         </div>
-        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform">
-          <span class="text-xs md:text-sm opacity-85 block mb-1">&#x263E; Cena</span>
+        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col justify-center">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1">&#x263E; Cena</span>
           <span class="text-xl md:text-2xl font-bold" id="tu-cena">--</span>
         </div>
       </div>
@@ -120,17 +120,20 @@
     <div class="mt-5">
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Resumen de comensales (Pulsa para ver detalle)</h2>
       <div class="grid grid-cols-3 gap-2.5">
-        <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-forest-light cursor-pointer transition-all">
-          <span class="text-xs md:text-sm text-white/90 block mb-1">☼ Desay.</span>
-          <span class="text-2xl md:text-3xl font-extrabold text-white" id="tot-desayuno">0</span>
+        <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-forest-light cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[110px]">
+          <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold uppercase tracking-wider">☼ Desayuno</span>
+          <span class="text-4xl md:text-5xl font-extrabold text-white my-auto" id="tot-desayuno">0</span>
+          <div id="sub-tot-desayuno" class="text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
-        <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
-          <span class="text-xs md:text-sm text-gray-500 block mb-1">&#x1F374; Alm.</span>
-          <span class="text-2xl md:text-3xl font-extrabold text-gray-900" id="tot-almuerzo">0</span>
+        <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
+          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider">&#x1F374; Almuerzo</span>
+          <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-almuerzo">0</span>
+          <div id="sub-tot-almuerzo" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
-        <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900">
-          <span class="text-xs md:text-sm text-gray-500 block mb-1">&#x263E; Cena</span>
-          <span class="text-2xl md:text-3xl font-extrabold text-gray-900" id="tot-cena">0</span>
+        <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
+          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider">&#x263E; Cena</span>
+          <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-cena">0</span>
+          <div id="sub-tot-cena" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
       </div>
     </div>
@@ -403,7 +406,7 @@
     function guardarUsuarioInicial() {
       const selectModal = document.getElementById("select-usuario-inicial");
       usuarioPropietario = selectModal.value;
-      usuarioVisualizando = usuarioPropietario; // Al configurar, volvemos a ver nuestras iniciales
+      usuarioVisualizando = usuarioPropietario; 
       
       localStorage.setItem("comedor_usuario_activo", usuarioPropietario);
       document.getElementById("modal-usuario-inicial").classList.add("hidden");
@@ -429,7 +432,6 @@
         abrirModalSeleccionUsuarioInicial();
         selectElement.value = usuarioVisualizando;
       } else {
-        // Simplemente cambiamos de persona a visualizar / rellenar
         usuarioVisualizando = selectElement.value;
         renderizarVista();
       }
@@ -469,14 +471,13 @@
       const selectAus = document.getElementById("ausencia-user-select");
       const personas = rowsSheet.map(r => r[1]).filter(p => p);
       
-      // EL ICONO 👤 SOLO SE MUESTRA EN TUS INICIALES PROPIETARIAS
       let optionsHtml = personas.map(p => {
         const esMio = (p === usuarioPropietario);
         const textoEtiqueta = esMio ? `👤 ${p}` : p;
         return `<option value="${p}">${textoEtiqueta}</option>`;
       }).join("");
 
-      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️</option>`;
+      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️ Cambiar iniciales...</option>`;
 
       select.innerHTML = optionsHtml;
       if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p === usuarioPropietario ? '👤 ' + p : p}</option>`).join("");
@@ -713,36 +714,39 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
-      const claseInactiva = "bg-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900";
+      const claseInactiva = "bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]";
       cardDesay.className = claseInactiva;
       cardAlm.className = claseInactiva;
       cardCena.className = claseInactiva;
 
-      cardDesay.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
-      cardDesay.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
+      cardDesay.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardDesay.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
+      cardDesay.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
-      cardAlm.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
-      cardAlm.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
+      cardAlm.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardAlm.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
+      cardAlm.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
-      cardCena.querySelector("span:first-child").className = "text-xs md:text-sm text-gray-500 block mb-1";
-      cardCena.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-gray-900";
+      cardCena.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardCena.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
+      cardCena.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
-      const claseActiva = "bg-forest-light text-white rounded-2xl p-3.5 md:p-4 shadow-sm border-2 border-forest-light cursor-pointer transition-all";
+      const claseActiva = "bg-forest-light text-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-forest-light cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[110px]";
 
       let cardActiva = cardDesay;
       if (servicioDetalleActivo === 'almuerzo') cardActiva = cardAlm;
       if (servicioDetalleActivo === 'cena') cardActiva = cardCena;
 
       cardActiva.className = claseActiva;
-      cardActiva.querySelector("span:first-child").className = "text-xs md:text-sm text-white/90 block mb-1";
-      cardActiva.querySelector("span:last-child").className = "text-2xl md:text-3xl font-extrabold text-white";
+      cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardActiva.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-white my-auto";
+      cardActiva.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
     }
 
     function renderizarVista() {
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
       const filaPersona = rowsSheet.find(r => r[1] === usuarioVisualizando);
 
-      // Actualizar el título dinámicamente si vemos a otro usuario
       const labelTuEsteDia = document.getElementById("label-tu-este-dia");
       if (usuarioVisualizando === usuarioPropietario) {
         labelTuEsteDia.textContent = "Tú este día (Pulsa para cambiar)";
@@ -798,28 +802,9 @@
       }
 
       let cDesay = 0, cAlm = 0, cCena = 0;
-      rowsSheet.forEach(r => {
-        const pName = r[1];
-        if (!pName) return;
-        const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
-        if (colF !== -1) {
-          const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
-          const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
-          const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
-
-          const dVal = String(valDReal !== undefined ? valDReal : (r[colF] || "")).toLowerCase();
-          const aVal = String(valAReal !== undefined ? valAReal : (r[colF + 1] || "")).toLowerCase();
-          const cVal = String(valCReal !== undefined ? valCReal : (r[colF + 2] || "")).toLowerCase();
-
-          if (dVal === "" || dVal === "si") cDesay++;
-          if (aVal === "" || aVal === "si") cAlm++;
-          if (cVal === "" || cVal === "si") cCena++;
-        }
-      });
-
-      document.getElementById("tot-desayuno").textContent = cDesay;
-      document.getElementById("tot-almuerzo").textContent = cAlm;
-      document.getElementById("tot-cena").textContent = cCena;
+      let espDesay = {tarde: 0, temp: 0, bolsa: 0};
+      let espAlm = {tarde: 0, temp: 0, bolsa: 0};
+      let espCena = {tarde: 0, temp: 0, bolsa: 0};
 
       let listSi = [];
       let listEsp = [];
@@ -830,6 +815,31 @@
         if (!pName) return;
         const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
         if (colF !== -1) {
+          // Lógica de conteos totales y extras (bolsa, tarde, temp) para los 3 servicios simultáneamente
+          const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
+          const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
+          const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
+
+          const dVal = String(valDReal !== undefined ? valDReal : (r[colF] || "")).toLowerCase();
+          const aVal = String(valAReal !== undefined ? valAReal : (r[colF + 1] || "")).toLowerCase();
+          const cVal = String(valCReal !== undefined ? valCReal : (r[colF + 2] || "")).toLowerCase();
+
+          if (dVal === "" || dVal === "si") cDesay++;
+          else if (dVal === "tarde") espDesay.tarde++;
+          else if (dVal === "temp") espDesay.temp++;
+          else if (dVal === "bolsa") espDesay.bolsa++;
+
+          if (aVal === "" || aVal === "si") cAlm++;
+          else if (aVal === "tarde") espAlm.tarde++;
+          else if (aVal === "temp") espAlm.temp++;
+          else if (aVal === "bolsa") espAlm.bolsa++;
+
+          if (cVal === "" || cVal === "si") cCena++;
+          else if (cVal === "tarde") espCena.tarde++;
+          else if (cVal === "temp") espCena.temp++;
+          else if (cVal === "bolsa") espCena.bolsa++;
+
+          // Lógica exclusiva para pintar las etiquetas inferiores del servicio seleccionado
           const offset = servicioDetalleActivo === 'desayuno' ? 0 : (servicioDetalleActivo === 'almuerzo' ? 1 : 2);
           const valPendiente = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|${servicioDetalleActivo}`];
           const valorCelda = String(valPendiente !== undefined ? valPendiente : (r[colF + offset] || "")).toLowerCase();
@@ -846,6 +856,22 @@
           }
         }
       });
+
+      document.getElementById("tot-desayuno").textContent = cDesay;
+      document.getElementById("tot-almuerzo").textContent = cAlm;
+      document.getElementById("tot-cena").textContent = cCena;
+
+      const formatSpecials = (esp) => {
+        let parts = [];
+        if (esp.bolsa > 0) parts.push(`+ ${esp.bolsa} bolsa`);
+        if (esp.tarde > 0) parts.push(`+ ${esp.tarde} tarde`);
+        if (esp.temp > 0) parts.push(`+ ${esp.temp} temp`);
+        return parts.join(' ');
+      };
+
+      document.getElementById("sub-tot-desayuno").textContent = formatSpecials(espDesay);
+      document.getElementById("sub-tot-almuerzo").textContent = formatSpecials(espAlm);
+      document.getElementById("sub-tot-cena").textContent = formatSpecials(espCena);
 
       const nombreServicioCapitalizado = servicioDetalleActivo.toUpperCase();
       document.getElementById("titulo-seccion-comen").textContent = `COMEN · ${nombreServicioCapitalizado}`;
@@ -1267,18 +1293,39 @@
     cargarDatos();
   </script>
 
-  <!-- ================= EL EXORCISMO DEL SERVICE WORKER VIEJO ================= -->
+  <!-- ================= REGISTRO DE SERVICE WORKER CON AUTO-UPDATE ================= -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) {
-          registration.unregister();
-          console.log('FANTASMA ELIMINADO: Service Worker antiguo desregistrado');
-        }
-      }).then(() => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Nuevo motor PWA registrado con éxito', reg))
-          .catch(err => console.warn('Error al registrar', err));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((registration) => {
+          
+          // Comprobar activamente si hay una nueva versión en GitHub
+          registration.update();
+
+          // Si detecta un nuevo Service Worker esperando, forzar recarga
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('Nueva versión encontrada. Actualizando automáticamente...');
+                  window.location.reload();
+                }
+              };
+            }
+          };
+        }).catch((err) => {
+          console.warn('Error al registrar Service Worker:', err);
+        });
+
+        // Escuchar si el nuevo Service Worker ha tomado el control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
