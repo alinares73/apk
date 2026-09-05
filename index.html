@@ -91,15 +91,15 @@
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2" id="label-tu-este-dia">Tú este día (Pulsa para cambiar)</h2>
       <div class="grid grid-cols-3 gap-2.5">
         <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider uppercase">☼ Desayuno</span>
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">☼ Desayuno</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-desayuno">--</span>
         </div>
         <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider uppercase">&#x1F374; Almuerzo</span>
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">&#x1F374; Almuerzo</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-almuerzo">--</span>
         </div>
         <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider uppercase">&#x263E; Cena</span>
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">&#x263E; Cena</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-cena">--</span>
         </div>
       </div>
@@ -121,17 +121,17 @@
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Resumen de comensales (Pulsa para ver detalle)</h2>
       <div class="grid grid-cols-3 gap-2.5">
         <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-forest-light cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold uppercase tracking-wider">☼ Desayuno</span>
+          <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold tracking-wider">☼ Desayuno</span>
           <span class="text-4xl md:text-5xl font-extrabold text-white my-auto" id="tot-desayuno">0</span>
           <div id="sub-tot-desayuno" class="text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
         <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider">&#x1F374; Almuerzo</span>
+          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider">&#x1F374; Almuerzo</span>
           <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-almuerzo">0</span>
           <div id="sub-tot-almuerzo" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
         <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider">&#x263E; Cena</span>
+          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider">&#x263E; Cena</span>
           <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-cena">0</span>
           <div id="sub-tot-cena" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
         </div>
@@ -477,7 +477,7 @@
         return `<option value="${p}">${textoEtiqueta}</option>`;
       }).join("");
 
-      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️ </option>`;
+      optionsHtml += `<option value="CAMBIAR_PERFIL" style="font-weight: bold; color: #8C4340;">⚙️</option>`;
 
       select.innerHTML = optionsHtml;
       if (selectAus) selectAus.innerHTML = personas.map(p => `<option value="${p}">${p === usuarioPropietario ? '👤 ' + p : p}</option>`).join("");
@@ -719,15 +719,15 @@
       cardAlm.className = claseInactiva;
       cardCena.className = claseInactiva;
 
-      cardDesay.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardDesay.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
       cardDesay.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
       cardDesay.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
-      cardAlm.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardAlm.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
       cardAlm.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
       cardAlm.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
-      cardCena.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardCena.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
       cardCena.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
       cardCena.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
 
@@ -738,7 +738,7 @@
       if (servicioDetalleActivo === 'cena') cardActiva = cardCena;
 
       cardActiva.className = claseActiva;
-      cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold uppercase tracking-wider";
+      cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold tracking-wider";
       cardActiva.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-white my-auto";
       cardActiva.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
     }
@@ -815,7 +815,6 @@
         if (!pName) return;
         const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
         if (colF !== -1) {
-          // Lógica de conteos totales y extras (bolsa, tarde, temp) para los 3 servicios simultáneamente
           const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
           const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
           const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
@@ -839,7 +838,6 @@
           else if (cVal === "temp") espCena.temp++;
           else if (cVal === "bolsa") espCena.bolsa++;
 
-          // Lógica exclusiva para pintar las etiquetas inferiores del servicio seleccionado
           const offset = servicioDetalleActivo === 'desayuno' ? 0 : (servicioDetalleActivo === 'almuerzo' ? 1 : 2);
           const valPendiente = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|${servicioDetalleActivo}`];
           const valorCelda = String(valPendiente !== undefined ? valPendiente : (r[colF + offset] || "")).toLowerCase();
