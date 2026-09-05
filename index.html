@@ -15,7 +15,7 @@
   
   <meta name="theme-color" content="#264334">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F6F4EE; }
     .bg-forest { background-color: #264334; }
@@ -63,7 +63,7 @@
       <div class="flex overflow-x-auto no-scrollbar py-2 w-full relative" id="semana-container"></div>
     </div>
 
-    <!-- Cabecera Fecha y Usuario Compacta y Alineada a la Derecha -->
+    <!-- Cabecera Fecha y Usuario -->
     <div class="flex justify-between items-center my-4">
       <div class="flex items-center space-x-3 md:space-x-4">
         <span class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-none" id="dia-num">--</span>
@@ -89,17 +89,17 @@
     <!-- Tú este día / Persona seleccionada -->
     <div class="mt-4">
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2" id="label-tu-este-dia">Tú este día (Pulsa para cambiar)</h2>
-      <div class="grid grid-cols-3 gap-2.5">
-        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">☼ Desayuno</span>
+      <div class="grid grid-cols-3 gap-2 md:gap-2.5">
+        <div onclick="abrirModalEstado('desayuno')" class="bg-forest text-white rounded-[20px] p-3 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">☼</span> DESAY</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-desayuno">--</span>
         </div>
-        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">&#x1F374; Almuerzo</span>
+        <div onclick="abrirModalEstado('almuerzo')" class="bg-forest text-white rounded-[20px] p-3 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x1F374;</span> ALM</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-almuerzo">--</span>
         </div>
-        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-2xl p-3.5 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
-          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-bold tracking-wider">&#x263E; Cena</span>
+        <div onclick="abrirModalEstado('cena')" class="bg-forest text-white rounded-[20px] p-3 md:p-4 shadow-sm cursor-pointer active:scale-95 transition-transform flex flex-col items-center justify-center text-center min-h-[95px]">
+          <span class="text-[11px] md:text-xs opacity-85 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x263E;</span> CENA</span>
           <span class="text-2xl md:text-3xl font-extrabold my-auto" id="tu-cena">--</span>
         </div>
       </div>
@@ -119,21 +119,25 @@
     <!-- Resumen de comensales -->
     <div class="mt-5">
       <h2 class="text-[11px] md:text-xs font-bold tracking-wider text-gray-500 uppercase mb-2">Resumen de comensales (Pulsa para ver detalle)</h2>
-      <div class="grid grid-cols-3 gap-2.5">
-        <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-forest-light text-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-forest-light cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold tracking-wider">☼ Desayuno</span>
-          <span class="text-4xl md:text-5xl font-extrabold text-white my-auto" id="tot-desayuno">0</span>
-          <div id="sub-tot-desayuno" class="text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
-        </div>
-        <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider">&#x1F374; Almuerzo</span>
-          <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-almuerzo">0</span>
-          <div id="sub-tot-almuerzo" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
-        </div>
-        <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]">
-          <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider">&#x263E; Cena</span>
-          <span class="text-4xl md:text-5xl font-extrabold text-gray-900 my-auto" id="tot-cena">0</span>
-          <div id="sub-tot-cena" class="text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words"></div>
+      
+      <!-- CONTENEDOR NARANJA ELEGANTE -->
+      <div class="bg-[#E19D29] p-2 md:p-2.5 rounded-[24px] shadow-md">
+        <div class="grid grid-cols-3 gap-2">
+          <div onclick="seleccionarServicioDetalle('desayuno')" id="card-tot-desay" class="bg-[#264334] text-white rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]">
+            <span class="text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">☼</span> DESAY</span>
+            <span class="text-5xl md:text-6xl font-black text-white my-auto" id="tot-desayuno">0</span>
+            <div id="sub-tot-desayuno" class="text-xs md:text-sm font-bold text-white/90 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+          </div>
+          <div onclick="seleccionarServicioDetalle('almuerzo')" id="card-tot-alm" class="bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]">
+            <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x1F374;</span> ALM</span>
+            <span class="text-5xl md:text-6xl font-black text-gray-900 my-auto" id="tot-almuerzo">0</span>
+            <div id="sub-tot-almuerzo" class="text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+          </div>
+          <div onclick="seleccionarServicioDetalle('cena')" id="card-tot-cena" class="bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]">
+            <span class="text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase"><span class="text-lg md:text-xl mr-0.5">&#x263E;</span> CENA</span>
+            <span class="text-5xl md:text-6xl font-black text-gray-900 my-auto" id="tot-cena">0</span>
+            <div id="sub-tot-cena" class="text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -714,33 +718,39 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
-      const claseInactiva = "bg-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-transparent cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[110px]";
+      // Clases para las tarjetas NO seleccionadas (Fondo blanco dentro de la zona naranja)
+      const claseInactiva = "bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]";
+      const headerInactivo = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
+      const numberInactivo = "text-5xl md:text-6xl font-black text-gray-900 my-auto";
+      const subInactivo = "text-xs md:text-sm font-bold text-gray-500 mt-1 min-h-[18px] leading-tight text-center w-full break-words";
+
       cardDesay.className = claseInactiva;
       cardAlm.className = claseInactiva;
       cardCena.className = claseInactiva;
 
-      cardDesay.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
-      cardDesay.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
-      cardDesay.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
+      cardDesay.querySelector("span:first-child").className = headerInactivo;
+      cardDesay.querySelector("span:nth-child(2)").className = numberInactivo;
+      cardDesay.querySelector("div:last-child").className = subInactivo;
 
-      cardAlm.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
-      cardAlm.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
-      cardAlm.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
+      cardAlm.querySelector("span:first-child").className = headerInactivo;
+      cardAlm.querySelector("span:nth-child(2)").className = numberInactivo;
+      cardAlm.querySelector("div:last-child").className = subInactivo;
 
-      cardCena.querySelector("span:first-child").className = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-bold tracking-wider";
-      cardCena.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-gray-900 my-auto";
-      cardCena.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-gray-500 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
+      cardCena.querySelector("span:first-child").className = headerInactivo;
+      cardCena.querySelector("span:nth-child(2)").className = numberInactivo;
+      cardCena.querySelector("div:last-child").className = subInactivo;
 
-      const claseActiva = "bg-forest-light text-white rounded-2xl p-4 md:p-5 shadow-sm border-2 border-forest-light cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[110px]";
+      // Clases para la tarjeta SELECCIONADA (Fondo Verde Bosque dentro de la zona naranja)
+      const claseActiva = "bg-[#264334] text-white rounded-[18px] p-3 shadow-lg border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]";
 
       let cardActiva = cardDesay;
       if (servicioDetalleActivo === 'almuerzo') cardActiva = cardAlm;
       if (servicioDetalleActivo === 'cena') cardActiva = cardCena;
 
       cardActiva.className = claseActiva;
-      cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-bold tracking-wider";
-      cardActiva.querySelector("span:nth-child(2)").className = "text-4xl md:text-5xl font-extrabold text-white my-auto";
-      cardActiva.querySelector("div:last-child").className = "text-[10px] md:text-[11px] font-semibold text-white/80 mt-1 min-h-[16px] leading-tight text-center w-full break-words";
+      cardActiva.querySelector("span:first-child").className = "text-[11px] md:text-xs text-white/90 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
+      cardActiva.querySelector("span:nth-child(2)").className = "text-5xl md:text-6xl font-black text-white my-auto";
+      cardActiva.querySelector("div:last-child").className = "text-xs md:text-sm font-bold text-white/90 mt-1 min-h-[18px] leading-tight text-center w-full break-words";
     }
 
     function renderizarVista() {
@@ -861,9 +871,9 @@
 
       const formatSpecials = (esp) => {
         let parts = [];
-        if (esp.bolsa > 0) parts.push(`+ ${esp.bolsa} bolsa`);
-        if (esp.tarde > 0) parts.push(`+ ${esp.tarde} tarde`);
-        if (esp.temp > 0) parts.push(`+ ${esp.temp} temp`);
+        if (esp.bolsa > 0) parts.push(`+${esp.bolsa} bolsa`);
+        if (esp.tarde > 0) parts.push(`+${esp.tarde} tarde`);
+        if (esp.temp > 0) parts.push(`+${esp.temp} temp`);
         return parts.join(' ');
       };
 
