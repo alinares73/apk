@@ -1,5 +1,5 @@
 // CADA VEZ QUE CAMBIES EL INDEX.HTML EN EL FUTURO, CAMBIA ESTE NÚMERO (ej. v2, v3, v4...)
-const CACHE_NAME = 'ciudadela-v6';
+const CACHE_NAME = 'ciudadela-v7';
 
 // 1. Instalación de la aplicación en el móvil
 self.addEventListener('install', (e) => {
