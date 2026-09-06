@@ -41,21 +41,21 @@
   <!-- ================= PANTALLA PRINCIPAL MAIN ================= -->
   <div id="pantalla-principal">
     
-    <!-- Cabecera principal con Imagen Banner Edge-to-Edge Recta y botón HOY flotante -->
+    <!-- Cabecera principal con Imagen Banner Edge-to-Edge Recta y botón HOY flotante bajado -->
     <header class="relative -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-8 md:-mt-8">
       <!-- La imagen ignora los márgenes, toca los bordes y es plana por abajo -->
       <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover">
       
-      <!-- Botón HOY sobre la imagen (top-8 para respetar la barra del reloj del móvil) -->
-      <div class="absolute top-8 right-4 sm:top-10 sm:right-6 md:top-10 md:right-8 z-10">
-        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/90 backdrop-blur-md hover:bg-[#F2D1CE] text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-lg active:scale-95 transition-all tracking-wider uppercase border border-white/50">
+      <!-- Botón HOY sobre la imagen (bajado con top-14 y fondo más transparente) -->
+      <div class="absolute top-14 right-4 sm:top-16 sm:right-6 md:top-20 md:right-8 z-10">
+        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/60 backdrop-blur-lg hover:bg-[#F2D1CE]/80 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40">
           HOY
         </button>
       </div>
     </header>
 
     <!-- Selector Carrusel Deslizable de Días -->
-    <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none">
+    <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none mt-6">
       <div class="flex items-center justify-between mb-2">
         <button onclick="cambiarSemanaFlecha(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
         <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">...</span>
