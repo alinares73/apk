@@ -41,11 +41,13 @@
   <!-- ================= PANTALLA PRINCIPAL MAIN ================= -->
   <div id="pantalla-principal">
     
-    <!-- Cabecera principal -->
-    <header class="flex justify-between items-center pt-2 pb-3">
-      <h1 class="text-3xl md:text-4xl font-extrabold leading-tight text-gray-900">Comedor<br>Ciudadela</h1>
-      <div>
-        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0] hover:bg-[#F2D1CE] text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-all tracking-wider uppercase">
+    <!-- Cabecera principal con Imagen Banner y botón HOY flotante -->
+    <header class="relative pt-1 pb-4">
+      <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-auto max-h-[140px] md:max-h-[180px] object-cover rounded-[24px] shadow-sm">
+      
+      <!-- Botón HOY sobre la imagen -->
+      <div class="absolute top-4 right-4 md:top-5 md:right-5">
+        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/90 backdrop-blur-sm hover:bg-[#F2D1CE] text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2 rounded-xl shadow-lg active:scale-95 transition-all tracking-wider uppercase border border-white/50">
           HOY
         </button>
       </div>
@@ -142,7 +144,7 @@
       </div>
     </div>
 
-    <!-- Observaciones / Nota del día (MOVIDO AQUÍ) -->
+    <!-- Observaciones / Nota del día -->
     <div id="contenedor-nota" class="hidden mt-5 bg-[#EDE5CD] text-[#7A6031] font-semibold text-sm md:text-base px-4 py-3.5 rounded-xl shadow-sm">
       <div id="texto-nota" class="space-y-1"></div>
     </div>
