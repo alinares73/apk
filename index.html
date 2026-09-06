@@ -41,10 +41,10 @@
   <!-- ================= PANTALLA PRINCIPAL MAIN ================= -->
   <div id="pantalla-principal">
     
-    <!-- Cabecera principal con Imagen Banner Edge-to-Edge y botón HOY flotante -->
-    <header class="relative -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-8 md:-mt-8 mb-6">
-      <!-- La imagen ignora los márgenes, toca los bordes y se redondea solo por abajo -->
-      <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover rounded-b-[32px] md:rounded-b-[40px] shadow-sm">
+    <!-- Cabecera principal con Imagen Banner Edge-to-Edge Recta y botón HOY flotante -->
+    <header class="relative -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-8 md:-mt-8">
+      <!-- La imagen ignora los márgenes, toca los bordes y es plana por abajo -->
+      <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover">
       
       <!-- Botón HOY sobre la imagen (top-8 para respetar la barra del reloj del móvil) -->
       <div class="absolute top-8 right-4 sm:top-10 sm:right-6 md:top-10 md:right-8 z-10">
@@ -145,7 +145,7 @@
       </div>
     </div>
 
-    <!-- Observaciones / Nota del día (MOVIDO AQUÍ) -->
+    <!-- Observaciones / Nota del día -->
     <div id="contenedor-nota" class="hidden mt-5 bg-[#EDE5CD] text-[#7A6031] font-semibold text-sm md:text-base px-4 py-3.5 rounded-xl shadow-sm">
       <div id="texto-nota" class="space-y-1"></div>
     </div>
@@ -1338,7 +1338,7 @@
           }
         });
       });
-    } 
+    }
   </script>
 </body>
 </html>
