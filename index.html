@@ -43,19 +43,17 @@
     
     <!-- Cabecera principal con Imagen Banner Edge-to-Edge Recta y botón HOY flotante bajado -->
     <header class="relative -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-8 md:-mt-8 flex flex-col">
-      <!-- La clase "block" y el contenedor flex eliminan los márgenes fantasma debajo de la imagen -->
       <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover block">
       
-      <!-- Botón HOY sobre la imagen (bajado a top-20 y con transparencia efecto cristal) -->
-      <div class="absolute top-20 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-10">
-        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/50 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40">
+      <div class="absolute top-12 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-10">
+        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40">
           HOY
         </button>
       </div>
     </header>
 
     <!-- Selector Carrusel Deslizable de Días -->
-    <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none relative z-10">
+    <div id="semana-box" class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 mb-4 select-none mt-6 relative z-10">
       <div class="flex items-center justify-between mb-2">
         <button onclick="cambiarSemanaFlecha(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-gray-700 text-lg active:scale-95 transition-all">&lsaquo;</button>
         <span id="mes-anio-label" class="text-xs md:text-sm font-extrabold uppercase tracking-wider text-gray-600 transition-all">...</span>
@@ -335,6 +333,26 @@
     let ausenciaFinalMeal = "cena";
     let focoAusencia = "inicio";
 
+    // =========================================================================
+    // MOTOR BLINDADO DE ESTADOS (A PRUEBA DE HUMANOS)
+    // =========================================================================
+    function interpretarEstado(val) {
+      if (val === undefined || val === null) return "si";
+      
+      // Limpieza total: minúsculas, sin acentos y SIN NINGÚN TIPO DE ESPACIO
+      let v = String(val).toLowerCase()
+               .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+               .replace(/[\s\u00A0]+/g, ""); // Destruye espacios normales y espacios fantasma de Excel
+               
+      if (v === "" || v === "si" || v === "s") return "si";
+      if (v.includes("tarde")) return "tarde";
+      if (v.includes("temp")) return "temp";
+      if (v.includes("bolsa")) return "bolsa";
+      if (v.includes("no")) return "no";
+      
+      return "no";
+    }
+
     async function cargarDatos() {
       const datosCache = localStorage.getItem("comensales_cache_rows");
       const headersCache = localStorage.getItem("comensales_cache_headers");
@@ -346,7 +364,9 @@
       }
 
       try {
-        const res = await fetch(SCRIPT_URL + "?mode=getData");
+        // ROMPE-CACHÉS para forzar la descarga siempre desde Drive
+        const timestamp = new Date().getTime();
+        const res = await fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" });
         const json = await res.json();
         if (json.ok) {
           headersSheet = json.headers;
@@ -455,7 +475,8 @@
       const btnHoy = document.querySelector("header button");
       btnHoy.innerText = "↻..."; 
       
-      fetch(SCRIPT_URL + "?mode=getData")
+      const timestamp = new Date().getTime();
+      fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
         .then(res => res.json())
         .then(json => {
           if (json.ok) {
@@ -828,37 +849,38 @@
         if (!pName) return;
         const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
         if (colF !== -1) {
+          
           const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
           const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
           const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
 
-          const dVal = String(valDReal !== undefined ? valDReal : (r[colF] || "")).toLowerCase();
-          const aVal = String(valAReal !== undefined ? valAReal : (r[colF + 1] || "")).toLowerCase();
-          const cVal = String(valCReal !== undefined ? valCReal : (r[colF + 2] || "")).toLowerCase();
+          const dEstado = interpretarEstado(valDReal !== undefined ? valDReal : r[colF]);
+          const aEstado = interpretarEstado(valAReal !== undefined ? valAReal : r[colF + 1]);
+          const cEstado = interpretarEstado(valCReal !== undefined ? valCReal : r[colF + 2]);
 
-          if (dVal === "" || dVal === "si") cDesay++;
-          else if (dVal === "tarde") espDesay.tarde++;
-          else if (dVal === "temp") espDesay.temp++;
-          else if (dVal === "bolsa") espDesay.bolsa++;
+          if (dEstado === "si") cDesay++;
+          else if (dEstado === "tarde") espDesay.tarde++;
+          else if (dEstado === "temp") espDesay.temp++;
+          else if (dEstado === "bolsa") espDesay.bolsa++;
 
-          if (aVal === "" || aVal === "si") cAlm++;
-          else if (aVal === "tarde") espAlm.tarde++;
-          else if (aVal === "temp") espAlm.temp++;
-          else if (aVal === "bolsa") espAlm.bolsa++;
+          if (aEstado === "si") cAlm++;
+          else if (aEstado === "tarde") espAlm.tarde++;
+          else if (aEstado === "temp") espAlm.temp++;
+          else if (aEstado === "bolsa") espAlm.bolsa++;
 
-          if (cVal === "" || cVal === "si") cCena++;
-          else if (cVal === "tarde") espCena.tarde++;
-          else if (cVal === "temp") espCena.temp++;
-          else if (cVal === "bolsa") espCena.bolsa++;
+          if (cEstado === "si") cCena++;
+          else if (cEstado === "tarde") espCena.tarde++;
+          else if (cEstado === "temp") espCena.temp++;
+          else if (cEstado === "bolsa") espCena.bolsa++;
 
           const offset = servicioDetalleActivo === 'desayuno' ? 0 : (servicioDetalleActivo === 'almuerzo' ? 1 : 2);
           const valPendiente = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|${servicioDetalleActivo}`];
-          const valorCelda = String(valPendiente !== undefined ? valPendiente : (r[colF + offset] || "")).toLowerCase();
+          const estadoCelda = interpretarEstado(valPendiente !== undefined ? valPendiente : r[colF + offset]);
 
-          if (valorCelda === "" || valorCelda === "si") {
+          if (estadoCelda === "si") {
             listSi.push(pName);
-          } else if (valorCelda === "tarde" || valorCelda === "temp" || valorCelda === "bolsa") {
-            let etiqueta = valorCelda === 'tarde' ? 'Tarde' : (valorCelda === 'temp' ? 'Temprano' : 'Bolsa');
+          } else if (estadoCelda === "tarde" || estadoCelda === "temp" || estadoCelda === "bolsa") {
+            let etiqueta = estadoCelda === 'tarde' ? 'Tarde' : (estadoCelda === 'temp' ? 'Temp.' : 'Bolsa');
             listEsp.push(`${pName} (${etiqueta})`);
           } else {
             if (pName !== 'Inv 1' && pName !== 'Inv 2') {
@@ -930,14 +952,15 @@
       return -1;
     }
 
+    // FORMATEO VISUAL PARA "TÚ ESTE DÍA" A PRUEBA DE HUMANOS Y OVERFLOW
     function formatearVisual(val) {
-      if (val === undefined || val === null || val === "") return "Sí";
-      const v = String(val).toLowerCase();
-      if (v === "no") return "No";
-      if (v === "tarde") return "Tarde";
-      if (v === "temp") return "Temprano";
-      if (v === "bolsa") return "Bolsa";
-      return val;
+      const estado = interpretarEstado(val);
+      if (estado === "si") return "Sí";
+      if (estado === "no") return "No";
+      if (estado === "tarde") return "Tarde";
+      if (estado === "temp") return "Temp."; // Ya no es "Temprano" para que no se salga de la caja
+      if (estado === "bolsa") return "Bolsa";
+      return val; 
     }
 
     // =========================================================================
@@ -1148,14 +1171,18 @@
           setTimeout(() => {
             cerrarPantallaAusencias();
             
-            fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
-              if (j.ok) {
-                headersSheet = j.headers;
-                rowsSheet = j.rows;
-                localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
-                localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-                renderizarVista();
-              }
+            // Refresco de datos con cache-buster al guardar rango
+            const timestamp = new Date().getTime();
+            fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
+              .then(r => r.json())
+              .then(j => {
+                if (j.ok) {
+                  headersSheet = j.headers;
+                  rowsSheet = j.rows;
+                  localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+                  localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+                  renderizarVista();
+                }
             });
             
           }, 1200);
@@ -1275,12 +1302,17 @@
         actualizarEstadoBotonGuardarSup();
         renderizarVista();
 
-        fetch(SCRIPT_URL + "?mode=getData").then(r => r.json()).then(j => {
+        // Refresco de datos con cache-buster tras guardar pendientes
+        const timestamp = new Date().getTime();
+        fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
+           .then(r => r.json())
+           .then(j => {
           if (j.ok) {
             headersSheet = j.headers;
             rowsSheet = j.rows;
             localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
             localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+            renderizarVista();
           }
         });
 
@@ -1310,10 +1342,8 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then((registration) => {
           
-          // Comprobar activamente si hay una nueva versión en GitHub
           registration.update();
 
-          // Si detecta un nuevo Service Worker esperando, forzar recarga
           registration.onupdatefound = () => {
             const installingWorker = registration.installing;
             if (installingWorker) {
@@ -1329,7 +1359,6 @@
           console.warn('Error al registrar Service Worker:', err);
         });
 
-        // Escuchar si el nuevo Service Worker ha tomado el control
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           if (!refreshing) {
