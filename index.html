@@ -1207,7 +1207,6 @@
         } else {
            const [person, fecha, meal] = k.split('|');
            if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
-           cambiosPorPersona[person].push(`${fecha}|meal|${pendientesActuales[k]}`);
            cambiosPorPersona[person].push(`${fecha}|${meal}|${pendientesActuales[k]}`);
         }
       });
