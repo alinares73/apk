@@ -1,14 +1,14 @@
 {
   "name": "Comedor Ciudadela",
-  "short_name": "Ciudadela",
+  "short_name": "Comensales", 
   "description": "Gestión de comensales del Comedor Ciudadela",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=2",
   "scope": "./",
   "display": "standalone",
   "background_color": "#F6F4EE",
   "theme_color": "#264334",
   "icons": [
-        {
+    {
       "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
