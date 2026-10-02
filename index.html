@@ -46,7 +46,8 @@
       <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover block">
       
       <div class="absolute top-12 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-10">
-        <button onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40">
+        <!-- MODIFICADO: Se añade un ID y clases de flexbox para centrar el spinner -->
+        <button id="btn-hoy" onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40 min-w-[70px] flex items-center justify-center">
           HOY
         </button>
       </div>
@@ -106,16 +107,7 @@
       </div>
     </div>
 
-    <!-- BOTÓN DE GUARDAR CAMBIOS -->
-    <div id="contenedor-btn-guardar-sup" class="hidden mt-4">
-      <button onclick="guardarCambiosPendientes()" class="w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse">
-        <div class="flex items-center space-x-2">
-          <span id="btn-guardar-icono">💾</span>
-          <span id="btn-guardar-txt-sup">Guardar cambios (0 pendientes)</span>
-        </div>
-        <span id="sync-status" class="text-xs text-white/70 font-medium tracking-tight">Pendiente</span>
-      </button>
-    </div>
+    <!-- ELIMINADO EL BOTÓN MANUAL DE GUARDAR CAMBIOS PARA HACERLO AUTOMÁTICO -->
 
     <!-- Resumen de comensales -->
     <div class="mt-5">
@@ -325,13 +317,19 @@
     // usuarioVisualizando: La persona seleccionada en el menú desplegable en este momento
     let usuarioVisualizando = "";
 
-    let ausenciaAnio = 2026;
-    let ausenciaMes = 7; 
+    // MODIFICADO: Inicia el calendario en el mes y año actual
+    const fechaActualParaAusencias = new Date();
+    let ausenciaAnio = fechaActualParaAusencias.getFullYear();
+    let ausenciaMes = fechaActualParaAusencias.getMonth(); 
+    
     let ausenciaInicioIso = null; 
     let ausenciaInicioMeal = "desayuno";
     let ausenciaFinalIso = null; 
     let ausenciaFinalMeal = "cena";
     let focoAusencia = "inicio";
+    
+    // Control de guardado en segundo plano
+    let guardandoFondo = false;
 
     // =========================================================================
     // MOTOR BLINDADO DE ESTADOS (A PRUEBA DE HUMANOS)
@@ -472,8 +470,9 @@
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
 
-      const btnHoy = document.querySelector("header button");
-      btnHoy.innerText = "↻..."; 
+      const btnHoy = document.getElementById("btn-hoy");
+      const txtAnterior = btnHoy.innerHTML;
+      btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`; 
       
       const timestamp = new Date().getTime();
       fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
@@ -486,11 +485,11 @@
             localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
             renderizarVista(); 
           }
-          btnHoy.innerText = "HOY"; 
+          if(!guardandoFondo) btnHoy.innerHTML = "HOY"; 
         })
         .catch(err => {
           console.warn("Error al refrescar los datos:", err);
-          btnHoy.innerText = "HOY";
+          if(!guardandoFondo) btnHoy.innerHTML = "HOY";
         });
     }
 
@@ -713,18 +712,11 @@
       renderizarVista();
     }
 
+    // MODIFICADO: Ahora desencadena el autoguardado en lugar de mostrar el botón
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
-      const contenedorSup = document.getElementById("contenedor-btn-guardar-sup");
-      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
-      const syncStatus = document.getElementById("sync-status");
-
       if (numCambios > 0) {
-        contenedorSup.classList.remove("hidden");
-        btnTxtSup.textContent = `Guardar cambios (${numCambios} pendientes)`;
-        syncStatus.textContent = "Pendiente";
-      } else {
-        contenedorSup.classList.add("hidden");
+        guardarCambiosPendientes(); // Lanza el guardado de fondo
       }
     }
 
@@ -978,6 +970,11 @@
       ausenciaInicioMeal = "desayuno";
       ausenciaFinalMeal = "cena";
       focoAusencia = "inicio";
+      
+      // MODIFICADO: Asigna el mes y año en curso por defecto para la vista del calendario
+      const fechaParaCalendario = new Date();
+      ausenciaAnio = fechaParaCalendario.getFullYear();
+      ausenciaMes = fechaParaCalendario.getMonth();
 
       resetearBotonGuardarRango();
       actualizarTarjetasInicioFinAusencias();
@@ -1200,23 +1197,26 @@
     }
 
     // =========================================================================
-    // GUARDADO PRINCIPAL
+    // GUARDADO EN SEGUNDO PLANO Y SINCRONIZACIÓN
     // =========================================================================
+    // MODIFICADO: Ahora el guardado ocurre automáticamente en segundo plano.
     async function guardarCambiosPendientes() {
+      if (guardandoFondo) return;
+      
       const keys = Object.keys(cambiosPendientes);
       if (keys.length === 0) return;
 
-      const btnGuardarSup = document.querySelector("#contenedor-btn-guardar-sup button");
-      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
-      const syncStatus = document.getElementById("sync-status");
-      const btnIcono = document.getElementById("btn-guardar-icono");
+      guardandoFondo = true;
+      
+      // Feedback Visual en el Botón "HOY"
+      const btnHoy = document.getElementById("btn-hoy");
+      const contenidoOriginalHoy = btnHoy.innerHTML;
+      btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`;
+      btnHoy.disabled = true;
 
-      btnGuardarSup.disabled = true;
-      btnGuardarSup.className = "w-full bg-gray-100 text-gray-500 font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base transition-colors cursor-wait";
-      btnIcono.textContent = "⏳";
-      btnTxtSup.textContent = "Guardando en Drive...";
-      syncStatus.textContent = "guardando cambios...";
-      syncStatus.className = "text-[11px] text-gray-400 font-semibold tracking-tight";
+      // Clonar y vaciar cola por si el usuario sigue haciendo clicks mientras guardamos
+      const pendientesActuales = { ...cambiosPendientes };
+      cambiosPendientes = {};
 
       let cambiosPorPersona = {};
       let obsPorFecha = {};
@@ -1224,12 +1224,12 @@
       keys.forEach(k => {
         if (k.startsWith("OBS_ARRAY|")) {
            const fecha = k.split('|')[1];
-           obsPorFecha[fecha] = cambiosPendientes[k];
+           obsPorFecha[fecha] = pendientesActuales[k];
         } else {
            const [person, fecha, meal] = k.split('|');
            if (!cambiosPorPersona[person]) cambiosPorPersona[person] = [];
-           cambiosPorPersona[person].push(`${fecha}|meal|${cambiosPendientes[k]}`);
-           cambiosPorPersona[person].push(`${fecha}|${meal}|${cambiosPendientes[k]}`);
+           cambiosPorPersona[person].push(`${fecha}|meal|${pendientesActuales[k]}`);
+           cambiosPorPersona[person].push(`${fecha}|${meal}|${pendientesActuales[k]}`);
         }
       });
 
@@ -1252,6 +1252,7 @@
           });
         }
 
+        // Actualizar almacenamiento local para que coincida con lo subido a Drive
         keys.forEach(k => {
           if (!k.startsWith("OBS_ARRAY|")) {
             const [person, fecha, meal] = k.split('|');
@@ -1260,7 +1261,7 @@
               const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
               if (fila) {
                 const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
-                fila[colIndex + offset] = cambiosPendientes[k];
+                fila[colIndex + offset] = pendientesActuales[k];
               }
             }
           }
@@ -1292,44 +1293,46 @@
         }
         
         localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-        cambiosPendientes = {};
         
-        btnGuardarSup.disabled = false;
-        btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
-        btnIcono.textContent = "💾";
-        syncStatus.className = "text-xs text-white/70 font-medium tracking-tight";
+        // Restaurar botón "HOY"
+        btnHoy.innerHTML = contenidoOriginalHoy;
+        btnHoy.disabled = false;
+        guardandoFondo = false;
         
-        actualizarEstadoBotonGuardarSup();
-        renderizarVista();
-
-        // Refresco de datos con cache-buster tras guardar pendientes
-        const timestamp = new Date().getTime();
-        fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
-           .then(r => r.json())
-           .then(j => {
-          if (j.ok) {
-            headersSheet = j.headers;
-            rowsSheet = j.rows;
-            localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
-            localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+        // Si hay nuevos cambios en cola porque tocaron algo más mientras se guardaba esto, iterar de nuevo.
+        if (Object.keys(cambiosPendientes).length > 0) {
+            guardarCambiosPendientes();
+        } else {
             renderizarVista();
-          }
-        });
+            
+            // Refresco total silencioso tras confirmar el guardado final (como doble seguro de integridad)
+            const timestamp = new Date().getTime();
+            fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
+               .then(r => r.json())
+               .then(j => {
+              if (j.ok) {
+                headersSheet = j.headers;
+                rowsSheet = j.rows;
+                localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+                localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+                renderizarVista();
+              }
+            });
+        }
 
       } catch (err) {
         console.error("Error al sincronizar con Drive:", err);
-        btnIcono.textContent = "⚠️";
-        btnTxtSup.textContent = "Error de conexión";
-        syncStatus.textContent = "Reintentar";
-        syncStatus.className = "text-xs text-red-500 font-bold";
-        btnGuardarSup.disabled = false;
+        
+        // Si falla algo devolvemos lo pendiente a la cola
+        cambiosPendientes = { ...pendientesActuales, ...cambiosPendientes };
+        
+        btnHoy.innerHTML = `<span class="text-red-600 text-lg leading-none">⚠️</span>`;
         
         setTimeout(() => {
-           btnGuardarSup.className = "w-full bg-forest text-white font-bold py-3.5 px-5 rounded-xl flex items-center justify-between text-sm md:text-base shadow-md active:scale-95 transition-transform animate-pulse";
-           btnIcono.textContent = "💾";
-           syncStatus.className = "text-xs text-white/70 font-medium tracking-tight";
-           actualizarEstadoBotonGuardarSup();
-        }, 4000);
+           btnHoy.innerHTML = contenidoOriginalHoy;
+           btnHoy.disabled = false;
+           guardandoFondo = false;
+        }, 3000);
       }
     }
 
