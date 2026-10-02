@@ -46,7 +46,6 @@
       <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover block">
       
       <div class="absolute top-12 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-10">
-        <!-- MODIFICADO: Se añade un ID y clases de flexbox para centrar el spinner -->
         <button id="btn-hoy" onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40 min-w-[70px] flex items-center justify-center">
           HOY
         </button>
@@ -106,8 +105,6 @@
         </div>
       </div>
     </div>
-
-    <!-- ELIMINADO EL BOTÓN MANUAL DE GUARDAR CAMBIOS PARA HACERLO AUTOMÁTICO -->
 
     <!-- Resumen de comensales -->
     <div class="mt-5">
@@ -317,7 +314,6 @@
     // usuarioVisualizando: La persona seleccionada en el menú desplegable en este momento
     let usuarioVisualizando = "";
 
-    // MODIFICADO: Inicia el calendario en el mes y año actual
     const fechaActualParaAusencias = new Date();
     let ausenciaAnio = fechaActualParaAusencias.getFullYear();
     let ausenciaMes = fechaActualParaAusencias.getMonth(); 
@@ -340,7 +336,7 @@
       // Limpieza total: minúsculas, sin acentos y SIN NINGÚN TIPO DE ESPACIO
       let v = String(val).toLowerCase()
                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-               .replace(/[\s\u00A0]+/g, ""); // Destruye espacios normales y espacios fantasma de Excel
+               .replace(/[\s\u00A0]+/g, ""); 
                
       if (v === "" || v === "si" || v === "s") return "si";
       if (v.includes("tarde")) return "tarde";
@@ -362,7 +358,6 @@
       }
 
       try {
-        // ROMPE-CACHÉS para forzar la descarga siempre desde Drive
         const timestamp = new Date().getTime();
         const res = await fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" });
         const json = await res.json();
@@ -635,7 +630,6 @@
       const clave = `${usuarioVisualizando}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
       actualizarEstadoBotonGuardarSup();
-      renderizarVista();
     }
 
     function abrirModalObservaciones() {
@@ -709,14 +703,12 @@
       cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
       cerrarModalObservaciones();
       actualizarEstadoBotonGuardarSup();
-      renderizarVista();
     }
 
-    // MODIFICADO: Ahora desencadena el autoguardado en lugar de mostrar el botón
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
       if (numCambios > 0) {
-        guardarCambiosPendientes(); // Lanza el guardado de fondo
+        guardarCambiosPendientes(); 
       }
     }
 
@@ -734,7 +726,6 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
-      // Clases para las tarjetas NO seleccionadas (Fondo blanco dentro de la zona naranja)
       const claseInactiva = "bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]";
       const headerInactivo = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
       const numberInactivo = "text-5xl md:text-6xl font-black text-gray-900 my-auto";
@@ -756,7 +747,6 @@
       cardCena.querySelector("span:nth-child(2)").className = numberInactivo;
       cardCena.querySelector("div:last-child").className = subInactivo;
 
-      // Clases para la tarjeta SELECCIONADA (Fondo Verde Bosque dentro de la zona naranja)
       const claseActiva = "bg-[#264334] text-white rounded-[18px] p-3 shadow-lg border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]";
 
       let cardActiva = cardDesay;
@@ -781,9 +771,9 @@
       }
 
       if (colIndex !== -1 && filaPersona) {
-        const vDesay = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
-        const vAlm = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
-        const vCena = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
+        const vDesay = filaPersona[colIndex];
+        const vAlm = filaPersona[colIndex + 1];
+        const vCena = filaPersona[colIndex + 2];
 
         document.getElementById("tu-desayuno").textContent = formatearVisual(vDesay);
         document.getElementById("tu-almuerzo").textContent = formatearVisual(vAlm);
@@ -797,11 +787,7 @@
       document.getElementById("mes-txt").textContent = `DE ${dateObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()}`;
 
       let listaNotas = [];
-      const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
-
-      if (pendienteObs !== undefined) {
-         listaNotas = [...pendienteObs];
-      } else if (colIndex !== -1 && rowsSheet.length > 0) {
+      if (colIndex !== -1 && rowsSheet.length > 0) {
         let obsRowIndex = -1;
         for (let r = 0; r < rowsSheet.length; r++) {
           if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
@@ -842,13 +828,9 @@
         const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
         if (colF !== -1) {
           
-          const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
-          const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
-          const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
-
-          const dEstado = interpretarEstado(valDReal !== undefined ? valDReal : r[colF]);
-          const aEstado = interpretarEstado(valAReal !== undefined ? valAReal : r[colF + 1]);
-          const cEstado = interpretarEstado(valCReal !== undefined ? valCReal : r[colF + 2]);
+          const dEstado = interpretarEstado(r[colF]);
+          const aEstado = interpretarEstado(r[colF + 1]);
+          const cEstado = interpretarEstado(r[colF + 2]);
 
           if (dEstado === "si") cDesay++;
           else if (dEstado === "tarde") espDesay.tarde++;
@@ -866,8 +848,7 @@
           else if (cEstado === "bolsa") espCena.bolsa++;
 
           const offset = servicioDetalleActivo === 'desayuno' ? 0 : (servicioDetalleActivo === 'almuerzo' ? 1 : 2);
-          const valPendiente = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|${servicioDetalleActivo}`];
-          const estadoCelda = interpretarEstado(valPendiente !== undefined ? valPendiente : r[colF + offset]);
+          const estadoCelda = interpretarEstado(r[colF + offset]);
 
           if (estadoCelda === "si") {
             listSi.push(pName);
@@ -944,13 +925,12 @@
       return -1;
     }
 
-    // FORMATEO VISUAL PARA "TÚ ESTE DÍA" A PRUEBA DE HUMANOS Y OVERFLOW
     function formatearVisual(val) {
       const estado = interpretarEstado(val);
       if (estado === "si") return "Sí";
       if (estado === "no") return "No";
       if (estado === "tarde") return "Tarde";
-      if (estado === "temp") return "Temp."; // Ya no es "Temprano" para que no se salga de la caja
+      if (estado === "temp") return "Temp.";
       if (estado === "bolsa") return "Bolsa";
       return val; 
     }
@@ -965,16 +945,19 @@
       document.getElementById("ausencia-user-select").value = usuarioVisualizando || usuarioPropietario;
       actualizarTituloAusencias();
 
-      ausenciaInicioIso = fechaIsoSeleccionada;
+      const fechaParaCalendario = new Date();
+      ausenciaAnio = fechaParaCalendario.getFullYear();
+      ausenciaMes = fechaParaCalendario.getMonth(); 
+      
+      // MODIFICADO: El día "Inicio" de las ausencias es ahora el día real natural por defecto
+      const mesActualSt = String(ausenciaMes + 1).padStart(2, '0');
+      const diaActualSt = String(fechaParaCalendario.getDate()).padStart(2, '0');
+      
+      ausenciaInicioIso = `${ausenciaAnio}-${mesActualSt}-${diaActualSt}`;
       ausenciaFinalIso = null;
       ausenciaInicioMeal = "desayuno";
       ausenciaFinalMeal = "cena";
       focoAusencia = "inicio";
-      
-      // MODIFICADO: Asigna el mes y año en curso por defecto para la vista del calendario
-      const fechaParaCalendario = new Date();
-      ausenciaAnio = fechaParaCalendario.getFullYear();
-      ausenciaMes = fechaParaCalendario.getMonth();
 
       resetearBotonGuardarRango();
       actualizarTarjetasInicioFinAusencias();
@@ -1168,7 +1151,6 @@
           setTimeout(() => {
             cerrarPantallaAusencias();
             
-            // Refresco de datos con cache-buster al guardar rango
             const timestamp = new Date().getTime();
             fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
               .then(r => r.json())
@@ -1197,9 +1179,8 @@
     }
 
     // =========================================================================
-    // GUARDADO EN SEGUNDO PLANO Y SINCRONIZACIÓN
+    // GUARDADO EN SEGUNDO PLANO (OPTIMISTIC UI)
     // =========================================================================
-    // MODIFICADO: Ahora el guardado ocurre automáticamente en segundo plano.
     async function guardarCambiosPendientes() {
       if (guardandoFondo) return;
       
@@ -1208,13 +1189,11 @@
 
       guardandoFondo = true;
       
-      // Feedback Visual en el Botón "HOY"
       const btnHoy = document.getElementById("btn-hoy");
       const contenidoOriginalHoy = btnHoy.innerHTML;
       btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`;
       btnHoy.disabled = true;
 
-      // Clonar y vaciar cola por si el usuario sigue haciendo clicks mientras guardamos
       const pendientesActuales = { ...cambiosPendientes };
       cambiosPendientes = {};
 
@@ -1232,6 +1211,52 @@
            cambiosPorPersona[person].push(`${fecha}|${meal}|${pendientesActuales[k]}`);
         }
       });
+
+      // --- CAMBIO APLICADO: OPTIMISTIC UI ---
+      // Actualizamos primero la base de datos local y refrescamos la vista de inmediato 
+      // antes de enviar a internet. Esto hace que los cambios sean instantáneos.
+      keys.forEach(k => {
+        if (!k.startsWith("OBS_ARRAY|")) {
+          const [person, fecha, meal] = k.split('|');
+          const colIndex = encontrarColumnaFechaExacta(fecha);
+          if (colIndex !== -1) {
+            const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
+            if (fila) {
+              const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
+              fila[colIndex + offset] = pendientesActuales[k];
+            }
+          }
+        }
+      });
+
+      for (const fecha in obsPorFecha) {
+         const notas = obsPorFecha[fecha];
+         const colIndex = encontrarColumnaFechaExacta(fecha);
+         if (colIndex !== -1) {
+           let obsRowIndex = -1;
+           for (let r = 0; r < rowsSheet.length; r++) {
+             if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
+               obsRowIndex = r; break;
+             }
+           }
+           if (obsRowIndex !== -1) {
+             let currentR = obsRowIndex + 1;
+             for (let i = 0; i < notas.length; i++) {
+               if (currentR >= rowsSheet.length) rowsSheet.push(new Array(rowsSheet[0].length).fill(""));
+               rowsSheet[currentR][colIndex] = notas[i];
+               currentR++;
+             }
+             for (let i = 0; i < 5; i++) {
+               if (currentR < rowsSheet.length) rowsSheet[currentR][colIndex] = "";
+               currentR++;
+             }
+           }
+         }
+      }
+      
+      localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+      renderizarVista(); // Actualiza contadores y listas instantáneamente
+      // ----------------------------------------
 
       try {
         for (const person in cambiosPorPersona) {
@@ -1251,61 +1276,15 @@
             body: JSON.stringify({ mode: "observaciones", date: fecha, values: notas })
           });
         }
-
-        // Actualizar almacenamiento local para que coincida con lo subido a Drive
-        keys.forEach(k => {
-          if (!k.startsWith("OBS_ARRAY|")) {
-            const [person, fecha, meal] = k.split('|');
-            const colIndex = encontrarColumnaFechaExacta(fecha);
-            if (colIndex !== -1) {
-              const fila = rowsSheet.find(r => String(r[1] || "").trim() === person);
-              if (fila) {
-                const offset = meal === 'desayuno' ? 0 : (meal === 'almuerzo' ? 1 : 2);
-                fila[colIndex + offset] = pendientesActuales[k];
-              }
-            }
-          }
-        });
-
-        for (const fecha in obsPorFecha) {
-           const notas = obsPorFecha[fecha];
-           const colIndex = encontrarColumnaFechaExacta(fecha);
-           if (colIndex !== -1) {
-             let obsRowIndex = -1;
-             for (let r = 0; r < rowsSheet.length; r++) {
-               if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
-                 obsRowIndex = r; break;
-               }
-             }
-             if (obsRowIndex !== -1) {
-               let currentR = obsRowIndex + 1;
-               for (let i = 0; i < notas.length; i++) {
-                 if (currentR >= rowsSheet.length) rowsSheet.push(new Array(rowsSheet[0].length).fill(""));
-                 rowsSheet[currentR][colIndex] = notas[i];
-                 currentR++;
-               }
-               for (let i = 0; i < 5; i++) {
-                 if (currentR < rowsSheet.length) rowsSheet[currentR][colIndex] = "";
-                 currentR++;
-               }
-             }
-           }
-        }
         
-        localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-        
-        // Restaurar botón "HOY"
         btnHoy.innerHTML = contenidoOriginalHoy;
         btnHoy.disabled = false;
         guardandoFondo = false;
         
-        // Si hay nuevos cambios en cola porque tocaron algo más mientras se guardaba esto, iterar de nuevo.
         if (Object.keys(cambiosPendientes).length > 0) {
             guardarCambiosPendientes();
         } else {
             renderizarVista();
-            
-            // Refresco total silencioso tras confirmar el guardado final (como doble seguro de integridad)
             const timestamp = new Date().getTime();
             fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
                .then(r => r.json())
@@ -1323,9 +1302,7 @@
       } catch (err) {
         console.error("Error al sincronizar con Drive:", err);
         
-        // Si falla algo devolvemos lo pendiente a la cola
         cambiosPendientes = { ...pendientesActuales, ...cambiosPendientes };
-        
         btnHoy.innerHTML = `<span class="text-red-600 text-lg leading-none">⚠️</span>`;
         
         setTimeout(() => {
