@@ -266,7 +266,7 @@
       <div class="text-5xl mb-3">📅</div>
       <h3 class="font-extrabold text-gray-900 text-xl mb-3">Fin del calendario</h3>
       <p class="text-sm text-gray-500 mb-6 leading-relaxed">
-        Has llegado al último día configurado en el Excel. ¿Quieres que añada <strong>3 meses más</strong> automáticamente conservando toda la estructura?
+        El calendario actual finalizará en pocos días. ¿Quieres que añada <strong>3 meses más</strong> automáticamente conservando toda la estructura?
       </p>
       <div class="flex space-x-3 mt-4">
         <button onclick="document.getElementById('modal-ampliar-excel').classList.add('hidden')" class="flex-1 bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-bold text-sm transition-colors hover:bg-gray-200">
@@ -795,6 +795,57 @@
       cardActiva.querySelector("div:last-child").className = "text-sm md:text-base font-extrabold text-white/90 mt-1 min-h-[20px] leading-tight text-center w-full break-words";
     }
 
+    function actualizarUltimaFechaDelExcel() {
+      const mesesMap = { ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2, abr:3, abril:3, may:4, mayo:4, jun:5, junio:5, jul:6, julio:6, ago:7, agosto:7, sept:8, sep:8, septiembre:8, oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11 };
+      let currentYear = 2026;
+      let lastMonth = -1;
+      let detectedLastIso = null;
+
+      for (let c = 0; c < headersSheet.length; c++) {
+        const text = String(headersSheet[c]).toLowerCase();
+        const match = text.match(/(\d{1,2})\s*[-/]\s*([a-záéíóú]+)/);
+        if (match) {
+          const headD = parseInt(match[1], 10);
+          const headM = mesesMap[match[2]];
+          if (headM !== undefined) {
+            if (lastMonth !== -1 && headM < lastMonth) currentYear++;
+            lastMonth = headM;
+            const hDate = new Date(currentYear, headM, headD);
+            detectedLastIso = `${hDate.getFullYear()}-${String(hDate.getMonth() + 1).padStart(2, '0')}-${String(hDate.getDate()).padStart(2, '0')}`;
+          }
+        }
+      }
+      ultimaFechaIsoDelExcel = detectedLastIso;
+    }
+
+    function encontrarColumnaFechaExacta(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const target = new Date(y, m - 1, d);
+      const mesesMap = { ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2, abr:3, abril:3, may:4, mayo:4, jun:5, junio:5, jul:6, julio:6, ago:7, agosto:7, sept:8, sep:8, septiembre:8, oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11 };
+
+      let currentYear = 2026;
+      let lastMonth = -1;
+
+      for (let c = 0; c < headersSheet.length; c++) {
+        const text = String(headersSheet[c]).toLowerCase();
+        const match = text.match(/(\d{1,2})\s*[-/]\s*([a-záéíóú]+)/);
+        if (match) {
+          const headD = parseInt(match[1], 10);
+          const headM = mesesMap[match[2]];
+          if (headM !== undefined) {
+            if (lastMonth !== -1 && headM < lastMonth) currentYear++;
+            lastMonth = headM;
+
+            const hDate = new Date(currentYear, headM, headD);
+            if (hDate.getFullYear() === target.getFullYear() && hDate.getMonth() === target.getMonth() && hDate.getDate() === target.getDate()) {
+              return c; 
+            }
+          }
+        }
+      }
+      return -1;
+    }
+
     function renderizarVista() {
       const colIndex = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
       const filaPersona = rowsSheet.find(r => r[1] === usuarioVisualizando);
@@ -937,44 +988,19 @@
       
       actualizarEstilosTarjetasResumen();
 
-      // LANZAR EL AVISO SI ES EL ÚLTIMO DÍA
-      if (fechaIsoSeleccionada === ultimaFechaIsoDelExcel && !modalAmpliacionVisto) {
-        modalAmpliacionVisto = true;
-        document.getElementById("modal-ampliar-excel").classList.remove("hidden");
-      }
-    }
+      // LANZAR EL AVISO SI QUEDAN 7 DÍAS O MENOS PARA EL FIN DEL EXCEL
+      actualizarUltimaFechaDelExcel();
+      if (ultimaFechaIsoDelExcel && !modalAmpliacionVisto) {
+        const msDia = 1000 * 60 * 60 * 24;
+        const fechaSel = new Date(fechaIsoSeleccionada).getTime();
+        const fechaFin = new Date(ultimaFechaIsoDelExcel).getTime();
+        const diasRestantes = (fechaFin - fechaSel) / msDia;
 
-    function encontrarColumnaFechaExacta(iso) {
-      const [y, m, d] = iso.split('-').map(Number);
-      const target = new Date(y, m - 1, d);
-      const mesesMap = { ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2, abr:3, abril:3, may:4, mayo:4, jun:5, junio:5, jul:6, julio:6, ago:7, agosto:7, sept:8, sep:8, septiembre:8, oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11 };
-
-      let currentYear = 2026;
-      let lastMonth = -1;
-      let detectedLastIso = null;
-
-      for (let c = 0; c < headersSheet.length; c++) {
-        const text = String(headersSheet[c]).toLowerCase();
-        const match = text.match(/(\d{1,2})\s*[-/]\s*([a-záéíóú]+)/);
-        if (match) {
-          const headD = parseInt(match[1], 10);
-          const headM = mesesMap[match[2]];
-          if (headM !== undefined) {
-            if (lastMonth !== -1 && headM < lastMonth) currentYear++;
-            lastMonth = headM;
-
-            const hDate = new Date(currentYear, headM, headD);
-            detectedLastIso = `${hDate.getFullYear()}-${String(hDate.getMonth() + 1).padStart(2, '0')}-${String(hDate.getDate()).padStart(2, '0')}`;
-            
-            if (hDate.getFullYear() === target.getFullYear() && hDate.getMonth() === target.getMonth() && hDate.getDate() === target.getDate()) {
-              ultimaFechaIsoDelExcel = detectedLastIso; 
-              return c; 
-            }
-          }
+        if (diasRestantes >= 0 && diasRestantes <= 7) {
+          modalAmpliacionVisto = true;
+          document.getElementById("modal-ampliar-excel").classList.remove("hidden");
         }
       }
-      ultimaFechaIsoDelExcel = detectedLastIso;
-      return -1;
     }
 
     function formatearVisual(val) {
