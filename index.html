@@ -239,7 +239,6 @@
     </div>
   </div>
 
-
   <!-- Modal Estado Principal -->
   <div id="modal-estado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center">
@@ -258,6 +257,25 @@
         </button>
       </div>
       <button onclick="cerrarModal()" class="mt-5 text-gray-400 text-xs md:text-sm font-bold uppercase tracking-wider">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal Ampliar Excel (Aviso Final de Calendario) -->
+  <div id="modal-ampliar-excel" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl text-center">
+      <div class="text-5xl mb-3">📅</div>
+      <h3 class="font-extrabold text-gray-900 text-xl mb-3">Fin del calendario</h3>
+      <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+        Has llegado al último día configurado en el Excel. ¿Quieres que añada <strong>3 meses más</strong> automáticamente conservando toda la estructura?
+      </p>
+      <div class="flex space-x-3 mt-4">
+        <button onclick="document.getElementById('modal-ampliar-excel').classList.add('hidden')" class="flex-1 bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-bold text-sm transition-colors hover:bg-gray-200">
+          No, gracias
+        </button>
+        <button onclick="ejecutarAmpliacionExcel()" class="flex-1 bg-[#264334] text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+          Sí, ampliar
+        </button>
+      </div>
     </div>
   </div>
 
@@ -307,7 +325,10 @@
     let servicioModal = "";
     let servicioDetalleActivo = "desayuno"; 
     let cambiosPendientes = {}; 
+    
     let carruselInicializado = false;
+    let ultimaFechaIsoDelExcel = null; 
+    let modalAmpliacionVisto = false;  
     
     // usuarioPropietario: Las iniciales configuradas de este dispositivo (ej: "ALR")
     let usuarioPropietario = "";
@@ -526,7 +547,8 @@
       let diff = dOw === 0 ? -6 : 1 - dOw;
       fechaBase.setDate(fechaBase.getDate() + diff); 
 
-      for (let i = 0; i < 147; i++) {
+      // Cambiado a 400 para permitir deslizar hasta bien entrado 2027 sin topar con el final visual
+      for (let i = 0; i < 400; i++) {
         const d = new Date(fechaBase);
         d.setDate(fechaBase.getDate() + i);
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -900,12 +922,22 @@
       }
       
       actualizarEstilosTarjetasResumen();
+
+      // LANZAR EL AVISO SI ES EL ÚLTIMO DÍA
+      if (fechaIsoSeleccionada === ultimaFechaIsoDelExcel && !modalAmpliacionVisto) {
+        modalAmpliacionVisto = true;
+        document.getElementById("modal-ampliar-excel").classList.remove("hidden");
+      }
     }
 
     function encontrarColumnaFechaExacta(iso) {
       const [y, m, d] = iso.split('-').map(Number);
       const target = new Date(y, m - 1, d);
       const mesesMap = { ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2, abr:3, abril:3, may:4, mayo:4, jun:5, junio:5, jul:6, julio:6, ago:7, agosto:7, sept:8, sep:8, septiembre:8, oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11 };
+
+      let currentYear = 2026;
+      let lastMonth = -1;
+      let detectedLastIso = null;
 
       for (let c = 0; c < headersSheet.length; c++) {
         const text = String(headersSheet[c]).toLowerCase();
@@ -914,14 +946,20 @@
           const headD = parseInt(match[1], 10);
           const headM = mesesMap[match[2]];
           if (headM !== undefined) {
-            const hDate = new Date(2026, headM, headD);
+            if (lastMonth !== -1 && headM < lastMonth) currentYear++;
+            lastMonth = headM;
+
+            const hDate = new Date(currentYear, headM, headD);
+            detectedLastIso = `${hDate.getFullYear()}-${String(hDate.getMonth() + 1).padStart(2, '0')}-${String(hDate.getDate()).padStart(2, '0')}`;
+            
             if (hDate.getFullYear() === target.getFullYear() && hDate.getMonth() === target.getMonth() && hDate.getDate() === target.getDate()) {
-              if (text.includes('desay') || text.includes('desayuno')) return c;
-              return c;
+              ultimaFechaIsoDelExcel = detectedLastIso; 
+              return c; 
             }
           }
         }
       }
+      ultimaFechaIsoDelExcel = detectedLastIso;
       return -1;
     }
 
@@ -949,7 +987,6 @@
       ausenciaAnio = fechaParaCalendario.getFullYear();
       ausenciaMes = fechaParaCalendario.getMonth(); 
       
-      // MODIFICADO: El día "Inicio" de las ausencias es ahora el día real natural por defecto
       const mesActualSt = String(ausenciaMes + 1).padStart(2, '0');
       const diaActualSt = String(fechaParaCalendario.getDate()).padStart(2, '0');
       
@@ -1179,6 +1216,51 @@
     }
 
     // =========================================================================
+    // AMPLIACIÓN AUTOMÁTICA DEL EXCEL (NUEVO)
+    // =========================================================================
+    async function ejecutarAmpliacionExcel() {
+      document.getElementById('modal-ampliar-excel').classList.add('hidden');
+      
+      const btnHoy = document.getElementById("btn-hoy");
+      const textoOriginal = btnHoy.innerHTML;
+      btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`;
+      btnHoy.disabled = true;
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ mode: "extendSheet" })
+        });
+        const json = await res.json();
+        
+        if (json.ok) {
+          // Si tuvo éxito, recargamos los datos para tener los nuevos 3 meses en la app
+          const timestamp = new Date().getTime();
+          const newData = await fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" });
+          const jsonNew = await newData.json();
+          if (jsonNew.ok) {
+            headersSheet = jsonNew.headers;
+            rowsSheet = jsonNew.rows;
+            localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
+            localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
+            
+            modalAmpliacionVisto = false; // Resetear para el futuro
+            alert("¡Éxito! Se han creado 3 meses más en el Excel.");
+            renderizarVista();
+          }
+        } else {
+          alert("Error desde el servidor: " + json.error);
+        }
+      } catch (e) {
+        alert("Problema de conexión creando los días.");
+      } finally {
+        btnHoy.innerHTML = textoOriginal;
+        btnHoy.disabled = false;
+      }
+    }
+
+    // =========================================================================
     // GUARDADO EN SEGUNDO PLANO (OPTIMISTIC UI)
     // =========================================================================
     async function guardarCambiosPendientes() {
@@ -1211,9 +1293,6 @@
         }
       });
 
-      // --- CAMBIO APLICADO: OPTIMISTIC UI ---
-      // Actualizamos primero la base de datos local y refrescamos la vista de inmediato 
-      // antes de enviar a internet. Esto hace que los cambios sean instantáneos.
       keys.forEach(k => {
         if (!k.startsWith("OBS_ARRAY|")) {
           const [person, fecha, meal] = k.split('|');
@@ -1254,8 +1333,7 @@
       }
       
       localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-      renderizarVista(); // Actualiza contadores y listas instantáneamente
-      // ----------------------------------------
+      renderizarVista(); 
 
       try {
         for (const person in cambiosPorPersona) {
