@@ -279,6 +279,20 @@
     </div>
   </div>
 
+  <!-- Modal Éxito Ampliar Excel -->
+  <div id="modal-exito-ampliar" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl text-center">
+      <div class="text-5xl mb-3">✨</div>
+      <h3 class="font-extrabold text-gray-900 text-xl mb-3">¡Éxito!</h3>
+      <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+        Se han creado 3 meses más en el Excel.
+      </p>
+      <button onclick="document.getElementById('modal-exito-ampliar').classList.add('hidden')" class="w-full bg-[#264334] text-white py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-transform">
+        Aceptar
+      </button>
+    </div>
+  </div>
+
   <!-- Modal para Editar Observaciones Dinámicas -->
   <div id="modal-observaciones" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col max-h-[85vh]">
@@ -1246,7 +1260,7 @@
             localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
             
             modalAmpliacionVisto = false; // Resetear para el futuro
-            alert("¡Éxito! Se han creado 3 meses más en el Excel.");
+            document.getElementById('modal-exito-ampliar').classList.remove('hidden');
             renderizarVista();
           }
         } else {
