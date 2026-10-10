@@ -371,7 +371,6 @@
     function interpretarEstado(val) {
       if (val === undefined || val === null) return "si";
       
-      // Limpieza total: minúsculas, sin acentos y SIN NINGÚN TIPO DE ESPACIO
       let v = String(val).toLowerCase()
                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                .replace(/[\s\u00A0]+/g, ""); 
@@ -407,7 +406,7 @@
           rowsSheet = json.rows;
           localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
           localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-          localStorage.setItem("comedor_ultima_sync", timestamp.toString()); // Guardamos la hora exacta
+          localStorage.setItem("comedor_ultima_sync", timestamp.toString());
           if (carruselInicializado) renderizarVista(); 
         }
       } catch (err) {
@@ -428,7 +427,6 @@
         const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
         const ahora = new Date().getTime();
         
-        // Si ha pasado más de 2 horas sin abrirse, asume nuevo día/sesión, fuerza HOY y cartel
         if (ahora - ultimaSync > 1000 * 60 * 60 * 2) {
             const hoy = new Date();
             fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
@@ -439,7 +437,6 @@
             }
             refrescarDatosGlobales(true);
         } else {
-            // Actualización silenciosa si acaba de cambiar de app hace poco
             refrescarDatosGlobales(false);
         }
       }
@@ -451,14 +448,13 @@
       
       const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
       const ahora = new Date().getTime();
-      const necesitaCartel = (ahora - ultimaSync > 1000 * 60 * 60 * 2); // 2 horas
+      const necesitaCartel = (ahora - ultimaSync > 1000 * 60 * 60 * 2);
 
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
         rowsSheet = JSON.parse(datosCache);
         iniciarEntorno();
         
-        // Si ha pasado tiempo, nos aseguramos de que empiece en el día de HOY y mostramos el cartel
         if (necesitaCartel) {
             const hoy = new Date();
             fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
@@ -471,7 +467,6 @@
             refrescarDatosGlobales(false);
         }
       } else {
-        // Primera vez que se abre la app en la vida del dispositivo
         await refrescarDatosGlobales(true);
         iniciarEntorno();
       }
@@ -568,7 +563,6 @@
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
 
-      // Forzamos el refresco con la animación visual al pulsar explícitamente el botón HOY
       refrescarDatosGlobales(true);
     }
 
@@ -610,7 +604,6 @@
       let diff = dOw === 0 ? -6 : 1 - dOw;
       fechaBase.setDate(fechaBase.getDate() + diff); 
 
-      // Mantenemos los 400 días para no hacer tope pronto
       for (let i = 0; i < 400; i++) {
         const d = new Date(fechaBase);
         d.setDate(fechaBase.getDate() + i);
@@ -714,8 +707,12 @@
       cerrarModal();
       const clave = `${usuarioVisualizando}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
-      actualizarEstadoBotonGuardarSup();
+      
+      // OPTIMISTIC UI: Dibuja el cambio en pantalla inmediatamente
       renderizarVista();
+      
+      // Tras dibujarlo, activa el guardado en segundo plano
+      actualizarEstadoBotonGuardarSup();
     }
 
     function abrirModalObservaciones() {
@@ -788,22 +785,18 @@
 
       cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
       cerrarModalObservaciones();
-      actualizarEstadoBotonGuardarSup();
+      
+      // OPTIMISTIC UI: Dibuja el cambio en pantalla inmediatamente
       renderizarVista();
+      
+      // Tras dibujarlo, activa el guardado en segundo plano
+      actualizarEstadoBotonGuardarSup();
     }
 
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
-      const contenedorSup = document.getElementById("contenedor-btn-guardar-sup");
-      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
-      const syncStatus = document.getElementById("sync-status");
-
       if (numCambios > 0) {
-        contenedorSup.classList.remove("hidden");
-        btnTxtSup.textContent = `Guardar cambios (${numCambios} pendientes)`;
-        syncStatus.textContent = "Pendiente";
-      } else {
-        contenedorSup.classList.add("hidden");
+        guardarCambiosPendientes(); 
       }
     }
 
@@ -821,7 +814,6 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
-      // Clases para las tarjetas NO seleccionadas (Fondo blanco dentro de la zona naranja)
       const claseInactiva = "bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]";
       const headerInactivo = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
       const numberInactivo = "text-5xl md:text-6xl font-black text-gray-900 my-auto";
@@ -843,7 +835,6 @@
       cardCena.querySelector("span:nth-child(2)").className = numberInactivo;
       cardCena.querySelector("div:last-child").className = subInactivo;
 
-      // Clases para la tarjeta SELECCIONADA (Fondo Verde Bosque dentro de la zona naranja)
       const claseActiva = "bg-[#264334] text-white rounded-[18px] p-3 shadow-lg border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]";
 
       let cardActiva = cardDesay;
@@ -1442,7 +1433,7 @@
       }
       
       localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-      renderizarVista(); 
+      // No hacemos renderizarVista aquí para evitar destellos, ya lo hemos hecho al pulsar el botón.
 
       try {
         for (const person in cambiosPorPersona) {
@@ -1470,7 +1461,6 @@
         if (Object.keys(cambiosPendientes).length > 0) {
             guardarCambiosPendientes();
         } else {
-            renderizarVista();
             const timestamp = new Date().getTime();
             fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
                .then(r => r.json())
@@ -1499,7 +1489,6 @@
       }
     }
 
-    // ¡AQUÍ ESTABA EL ERROR! Faltaba la orden de arranque al final del archivo.
     cargarDatos();
   </script>
 
