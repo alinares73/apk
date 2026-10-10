@@ -45,10 +45,15 @@
     <header class="relative -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-8 md:-mt-8 flex flex-col">
       <img src="banner.jpg" alt="Comensales Ciudadela" class="w-full h-[140px] md:h-[180px] object-cover block">
       
-      <div class="absolute top-12 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-10">
+      <div class="absolute top-12 right-4 sm:top-14 sm:right-6 md:top-16 md:right-8 z-20 flex flex-col items-end">
         <button id="btn-hoy" onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40 min-w-[70px] flex items-center justify-center">
           HOY
         </button>
+        <!-- NUEVO: Cartel elegante de carga de datos -->
+        <div id="toast-actualizando" class="hidden mt-2 bg-gray-900/85 backdrop-blur-md text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg shadow-xl flex items-center space-x-2">
+          <span class="animate-spin text-sm leading-none">↻</span>
+          <span>Actualizando datos...</span>
+        </div>
       </div>
     </header>
 
@@ -172,7 +177,6 @@
       </button>
     </div>
   </div>
-
 
   <!-- ================= PANTALLA 2: GESTIÓN DE AUSENCIAS (RANGO) ================= -->
   <div id="pantalla-ausencias" class="hidden">
@@ -382,30 +386,95 @@
       return "no";
     }
 
-    async function cargarDatos() {
-      const datosCache = localStorage.getItem("comensales_cache_rows");
-      const headersCache = localStorage.getItem("comensales_cache_headers");
-
-      if (datosCache && headersCache) {
-        headersSheet = JSON.parse(headersCache);
-        rowsSheet = JSON.parse(datosCache);
-        iniciarEntorno();
+    // =========================================================================
+    // NUEVO MOTOR DE ACTUALIZACIÓN INTELIGENTE (Primer Uso / Nuevo Día)
+    // =========================================================================
+    async function refrescarDatosGlobales(mostrarCartel = false) {
+      const btnHoy = document.getElementById("btn-hoy");
+      const toast = document.getElementById("toast-actualizando");
+      
+      if (mostrarCartel) {
+        btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`;
+        toast.classList.remove("hidden");
       }
 
       try {
         const timestamp = new Date().getTime();
         const res = await fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" });
         const json = await res.json();
+        
         if (json.ok) {
           headersSheet = json.headers;
           rowsSheet = json.rows;
           localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
           localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-
-          iniciarEntorno();
+          localStorage.setItem("comedor_ultima_sync", timestamp.toString()); // Guardamos la hora exacta
+          if (carruselInicializado) renderizarVista(); 
         }
       } catch (err) {
-        console.warn("Sin conexión, usando datos en caché local:", err);
+        console.warn("Error al refrescar los datos:", err);
+      } finally {
+        if (mostrarCartel && !guardandoFondo) {
+          btnHoy.innerHTML = "HOY";
+          toast.classList.add("hidden");
+        }
+      }
+    }
+
+    // =========================================================================
+    // CONTROL DE VUELTA A LA APP (Background -> Foreground)
+    // =========================================================================
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
+        const ahora = new Date().getTime();
+        
+        // Si ha pasado más de 2 horas sin abrirse, asume nuevo día/sesión, fuerza HOY y cartel
+        if (ahora - ultimaSync > 1000 * 60 * 60 * 2) {
+            const hoy = new Date();
+            fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+            if (carruselInicializado) {
+                actualizarEstadoVisualCarrusel();
+                enfocarLunesDeFecha(fechaIsoSeleccionada, true);
+                renderizarVista();
+            }
+            refrescarDatosGlobales(true);
+        } else {
+            // Actualización silenciosa si acaba de cambiar de app hace poco
+            refrescarDatosGlobales(false);
+        }
+      }
+    });
+
+    async function cargarDatos() {
+      const datosCache = localStorage.getItem("comensales_cache_rows");
+      const headersCache = localStorage.getItem("comensales_cache_headers");
+      
+      const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
+      const ahora = new Date().getTime();
+      const necesitaCartel = (ahora - ultimaSync > 1000 * 60 * 60 * 2); // 2 horas
+
+      if (datosCache && headersCache) {
+        headersSheet = JSON.parse(headersCache);
+        rowsSheet = JSON.parse(datosCache);
+        iniciarEntorno();
+        
+        // Si ha pasado tiempo, nos aseguramos de que empiece en el día de HOY y mostramos el cartel
+        if (necesitaCartel) {
+            const hoy = new Date();
+            fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+            actualizarEstadoVisualCarrusel();
+            enfocarLunesDeFecha(fechaIsoSeleccionada, false);
+            renderizarVista();
+            
+            refrescarDatosGlobales(true);
+        } else {
+            refrescarDatosGlobales(false);
+        }
+      } else {
+        // Primera vez que se abre la app en la vida del dispositivo
+        await refrescarDatosGlobales(true);
+        iniciarEntorno();
       }
     }
 
@@ -500,27 +569,8 @@
       enfocarLunesDeFecha(fechaIsoSeleccionada, true);
       renderizarVista();
 
-      const btnHoy = document.getElementById("btn-hoy");
-      const txtAnterior = btnHoy.innerHTML;
-      btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`; 
-      
-      const timestamp = new Date().getTime();
-      fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
-        .then(res => res.json())
-        .then(json => {
-          if (json.ok) {
-            headersSheet = json.headers;
-            rowsSheet = json.rows;
-            localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
-            localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-            renderizarVista(); 
-          }
-          if(!guardandoFondo) btnHoy.innerHTML = "HOY"; 
-        })
-        .catch(err => {
-          console.warn("Error al refrescar los datos:", err);
-          if(!guardandoFondo) btnHoy.innerHTML = "HOY";
-        });
+      // Forzamos el refresco con la animación visual al pulsar explícitamente el botón HOY
+      refrescarDatosGlobales(true);
     }
 
     function inicializarSelectUsuarios() {
@@ -561,7 +611,7 @@
       let diff = dOw === 0 ? -6 : 1 - dOw;
       fechaBase.setDate(fechaBase.getDate() + diff); 
 
-      // Cambiado a 400 para permitir deslizar hasta bien entrado 2027 sin topar con el final visual
+      // Mantenemos los 400 días para no hacer tope pronto
       for (let i = 0; i < 400; i++) {
         const d = new Date(fechaBase);
         d.setDate(fechaBase.getDate() + i);
@@ -666,6 +716,7 @@
       const clave = `${usuarioVisualizando}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
       actualizarEstadoBotonGuardarSup();
+      renderizarVista();
     }
 
     function abrirModalObservaciones() {
@@ -739,12 +790,21 @@
       cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
       cerrarModalObservaciones();
       actualizarEstadoBotonGuardarSup();
+      renderizarVista();
     }
 
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
+      const contenedorSup = document.getElementById("contenedor-btn-guardar-sup");
+      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
+      const syncStatus = document.getElementById("sync-status");
+
       if (numCambios > 0) {
-        guardarCambiosPendientes(); 
+        contenedorSup.classList.remove("hidden");
+        btnTxtSup.textContent = `Guardar cambios (${numCambios} pendientes)`;
+        syncStatus.textContent = "Pendiente";
+      } else {
+        contenedorSup.classList.add("hidden");
       }
     }
 
@@ -762,6 +822,7 @@
       const cardAlm = document.getElementById("card-tot-alm");
       const cardCena = document.getElementById("card-tot-cena");
 
+      // Clases para las tarjetas NO seleccionadas (Fondo blanco dentro de la zona naranja)
       const claseInactiva = "bg-white/95 rounded-[18px] p-3 shadow-sm border-none cursor-pointer transition-all text-gray-900 flex flex-col items-center justify-center text-center min-h-[120px]";
       const headerInactivo = "text-[11px] md:text-xs text-gray-500 block mb-1 w-full text-left font-extrabold tracking-widest uppercase";
       const numberInactivo = "text-5xl md:text-6xl font-black text-gray-900 my-auto";
@@ -783,6 +844,7 @@
       cardCena.querySelector("span:nth-child(2)").className = numberInactivo;
       cardCena.querySelector("div:last-child").className = subInactivo;
 
+      // Clases para la tarjeta SELECCIONADA (Fondo Verde Bosque dentro de la zona naranja)
       const claseActiva = "bg-[#264334] text-white rounded-[18px] p-3 shadow-lg border-none cursor-pointer transition-all flex flex-col items-center justify-center text-center min-h-[120px]";
 
       let cardActiva = cardDesay;
@@ -858,9 +920,9 @@
       }
 
       if (colIndex !== -1 && filaPersona) {
-        const vDesay = filaPersona[colIndex];
-        const vAlm = filaPersona[colIndex + 1];
-        const vCena = filaPersona[colIndex + 2];
+        const vDesay = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|desayuno`] : filaPersona[colIndex];
+        const vAlm = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|almuerzo`] : filaPersona[colIndex + 1];
+        const vCena = cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] !== undefined ? cambiosPendientes[`${usuarioVisualizando}|${fechaIsoSeleccionada}|cena`] : filaPersona[colIndex + 2];
 
         document.getElementById("tu-desayuno").textContent = formatearVisual(vDesay);
         document.getElementById("tu-almuerzo").textContent = formatearVisual(vAlm);
@@ -874,7 +936,11 @@
       document.getElementById("mes-txt").textContent = `DE ${dateObj.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()}`;
 
       let listaNotas = [];
-      if (colIndex !== -1 && rowsSheet.length > 0) {
+      const pendienteObs = cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada];
+
+      if (pendienteObs !== undefined) {
+         listaNotas = [...pendienteObs];
+      } else if (colIndex !== -1 && rowsSheet.length > 0) {
         let obsRowIndex = -1;
         for (let r = 0; r < rowsSheet.length; r++) {
           if (String(rowsSheet[r][colIndex] || "").trim().toLowerCase().includes("observaciones")) {
@@ -915,9 +981,13 @@
         const colF = encontrarColumnaFechaExacta(fechaIsoSeleccionada);
         if (colF !== -1) {
           
-          const dEstado = interpretarEstado(r[colF]);
-          const aEstado = interpretarEstado(r[colF + 1]);
-          const cEstado = interpretarEstado(r[colF + 2]);
+          const valDReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|desayuno`];
+          const valAReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|almuerzo`];
+          const valCReal = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|cena`];
+
+          const dEstado = interpretarEstado(valDReal !== undefined ? valDReal : r[colF]);
+          const aEstado = interpretarEstado(valAReal !== undefined ? valAReal : r[colF + 1]);
+          const cEstado = interpretarEstado(valCReal !== undefined ? valCReal : r[colF + 2]);
 
           if (dEstado === "si") cDesay++;
           else if (dEstado === "tarde") espDesay.tarde++;
@@ -935,7 +1005,8 @@
           else if (cEstado === "bolsa") espCena.bolsa++;
 
           const offset = servicioDetalleActivo === 'desayuno' ? 0 : (servicioDetalleActivo === 'almuerzo' ? 1 : 2);
-          const estadoCelda = interpretarEstado(r[colF + offset]);
+          const valPendiente = cambiosPendientes[`${pName}|${fechaIsoSeleccionada}|${servicioDetalleActivo}`];
+          const estadoCelda = interpretarEstado(valPendiente !== undefined ? valPendiente : r[colF + offset]);
 
           if (estadoCelda === "si") {
             listSi.push(pName);
@@ -1256,7 +1327,7 @@
     }
 
     // =========================================================================
-    // AMPLIACIÓN AUTOMÁTICA DEL EXCEL (NUEVO)
+    // AMPLIACIÓN AUTOMÁTICA DEL EXCEL
     // =========================================================================
     async function ejecutarAmpliacionExcel() {
       document.getElementById('modal-ampliar-excel').classList.add('hidden');
@@ -1275,7 +1346,6 @@
         const json = await res.json();
         
         if (json.ok) {
-          // Si tuvo éxito, recargamos los datos para tener los nuevos 3 meses en la app
           const timestamp = new Date().getTime();
           const newData = await fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" });
           const jsonNew = await newData.json();
@@ -1285,7 +1355,7 @@
             localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
             localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
             
-            modalAmpliacionVisto = false; // Resetear para el futuro
+            modalAmpliacionVisto = false;
             document.getElementById('modal-exito-ampliar').classList.remove('hidden');
             renderizarVista();
           }
@@ -1430,7 +1500,6 @@
       }
     }
 
-    cargarDatos();
   </script>
 
   <!-- ================= REGISTRO DE SERVICE WORKER CON AUTO-UPDATE ================= -->
