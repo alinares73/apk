@@ -49,7 +49,7 @@
         <button id="btn-hoy" onclick="irAlDiaHoy()" class="bg-[#F8E2E0]/70 backdrop-blur-md hover:bg-[#F2D1CE]/90 text-[#8C4340] font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl shadow-md active:scale-95 transition-all tracking-wider uppercase border border-white/40 min-w-[70px] flex items-center justify-center">
           HOY
         </button>
-        <!-- NUEVO: Cartel elegante de carga de datos -->
+        <!-- Cartel elegante de carga de datos -->
         <div id="toast-actualizando" class="hidden mt-2 bg-gray-900/85 backdrop-blur-md text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg shadow-xl flex items-center space-x-2">
           <span class="animate-spin text-sm leading-none">↻</span>
           <span>Actualizando datos...</span>
@@ -365,6 +365,9 @@
     // Control de guardado en segundo plano
     let guardandoFondo = false;
 
+    // Constante para el tiempo de expiración de los datos cacheados (1 HORA en milisegundos)
+    const TIEMPO_EXPIRACION = 1000 * 60 * 60 * 1; 
+
     // =========================================================================
     // MOTOR BLINDADO DE ESTADOS (A PRUEBA DE HUMANOS)
     // =========================================================================
@@ -427,7 +430,8 @@
         const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
         const ahora = new Date().getTime();
         
-        if (ahora - ultimaSync > 1000 * 60 * 60 * 2) {
+        // Si ha pasado más de 1 hora sin abrirse, asume nueva sesión, fuerza HOY y muestra cartel
+        if (ahora - ultimaSync > TIEMPO_EXPIRACION) {
             const hoy = new Date();
             fechaIsoSeleccionada = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
             if (carruselInicializado) {
@@ -437,6 +441,7 @@
             }
             refrescarDatosGlobales(true);
         } else {
+            // Actualización silenciosa si acaba de cambiar de app hace poco (ej: fue a ver WhatsApp y volvió)
             refrescarDatosGlobales(false);
         }
       }
@@ -448,7 +453,7 @@
       
       const ultimaSync = parseInt(localStorage.getItem("comedor_ultima_sync") || "0");
       const ahora = new Date().getTime();
-      const necesitaCartel = (ahora - ultimaSync > 1000 * 60 * 60 * 2);
+      const necesitaCartel = (ahora - ultimaSync > TIEMPO_EXPIRACION);
 
       if (datosCache && headersCache) {
         headersSheet = JSON.parse(headersCache);
@@ -492,7 +497,6 @@
       inicializarSelectUsuarios();
       
       if (!carruselInicializado) {
-        // ... (CARRUSEL INICIALIZADO)
         construirCarruselContinuo();
         carruselInicializado = true;
         
@@ -709,10 +713,7 @@
       const clave = `${usuarioVisualizando}|${fechaIsoSeleccionada}|${servicioModal}`;
       cambiosPendientes[clave] = valNuevo;
       
-      // OPTIMISTIC UI: Dibuja el cambio en pantalla inmediatamente
       renderizarVista();
-      
-      // Tras dibujarlo, activa el guardado en segundo plano
       actualizarEstadoBotonGuardarSup();
     }
 
@@ -787,26 +788,14 @@
       cambiosPendientes["OBS_ARRAY|" + fechaIsoSeleccionada] = nuevosValores;
       cerrarModalObservaciones();
       
-      // OPTIMISTIC UI: Dibuja el cambio en pantalla inmediatamente
       renderizarVista();
-      
-      // Tras dibujarlo, activa el guardado en segundo plano
       actualizarEstadoBotonGuardarSup();
     }
 
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
-      const contenedorSup = document.getElementById("contenedor-btn-guardar-sup");
-      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
-      const syncStatus = document.getElementById("sync-status");
-
       if (numCambios > 0) {
-        contenedorSup.classList.remove("hidden");
-        btnTxtSup.textContent = `Guardar cambios (${numCambios} pendientes)`;
-        syncStatus.textContent = "Pendiente";
         guardarCambiosPendientes(); 
-      } else {
-        contenedorSup.classList.add("hidden");
       }
     }
 
@@ -1402,7 +1391,6 @@
         }
       });
 
-      // 1. Inyectamos en la caché local para que sea definitivo y no parpadee
       keys.forEach(k => {
         if (!k.startsWith("OBS_ARRAY|")) {
           const [person, fecha, meal] = k.split('|');
@@ -1443,9 +1431,7 @@
       }
       
       localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-      // No hacemos renderizarVista aquí, ya se hizo al hacer click. Así evitamos parpadeos.
 
-      // 2. Enviamos a Google Drive silenciosamente
       try {
         for (const person in cambiosPorPersona) {
           const cellsStr = cambiosPorPersona[person].join(';');
@@ -1468,10 +1454,8 @@
         guardandoFondo = false;
         
         if (Object.keys(cambiosPendientes).length > 0) {
-            // Si el usuario hizo más clics mientras se guardaba, lanza la siguiente tanda.
             guardarCambiosPendientes();
         } else {
-            // Terminó todo. NO hacemos GET para evitar que Google devuelva datos viejos.
             btnHoy.innerHTML = "HOY";
             btnHoy.disabled = false;
         }
