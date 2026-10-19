@@ -492,6 +492,7 @@
       inicializarSelectUsuarios();
       
       if (!carruselInicializado) {
+        // ... (CARRUSEL INICIALIZADO)
         construirCarruselContinuo();
         carruselInicializado = true;
         
@@ -795,8 +796,17 @@
 
     function actualizarEstadoBotonGuardarSup() {
       const numCambios = Object.keys(cambiosPendientes).length;
+      const contenedorSup = document.getElementById("contenedor-btn-guardar-sup");
+      const btnTxtSup = document.getElementById("btn-guardar-txt-sup");
+      const syncStatus = document.getElementById("sync-status");
+
       if (numCambios > 0) {
+        contenedorSup.classList.remove("hidden");
+        btnTxtSup.textContent = `Guardar cambios (${numCambios} pendientes)`;
+        syncStatus.textContent = "Pendiente";
         guardarCambiosPendientes(); 
+      } else {
+        contenedorSup.classList.add("hidden");
       }
     }
 
@@ -1361,7 +1371,7 @@
     }
 
     // =========================================================================
-    // GUARDADO EN SEGUNDO PLANO (OPTIMISTIC UI)
+    // GUARDADO EN SEGUNDO PLANO (OPTIMISTIC UI BLINDADA)
     // =========================================================================
     async function guardarCambiosPendientes() {
       if (guardandoFondo) return;
@@ -1372,7 +1382,6 @@
       guardandoFondo = true;
       
       const btnHoy = document.getElementById("btn-hoy");
-      const contenidoOriginalHoy = btnHoy.innerHTML;
       btnHoy.innerHTML = `<span class="inline-block animate-spin text-lg leading-none">↻</span>`;
       btnHoy.disabled = true;
 
@@ -1393,6 +1402,7 @@
         }
       });
 
+      // 1. Inyectamos en la caché local para que sea definitivo y no parpadee
       keys.forEach(k => {
         if (!k.startsWith("OBS_ARRAY|")) {
           const [person, fecha, meal] = k.split('|');
@@ -1433,8 +1443,9 @@
       }
       
       localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-      // No hacemos renderizarVista aquí para evitar destellos, ya lo hemos hecho al pulsar el botón.
+      // No hacemos renderizarVista aquí, ya se hizo al hacer click. Así evitamos parpadeos.
 
+      // 2. Enviamos a Google Drive silenciosamente
       try {
         for (const person in cambiosPorPersona) {
           const cellsStr = cambiosPorPersona[person].join(';');
@@ -1454,25 +1465,15 @@
           });
         }
         
-        btnHoy.innerHTML = contenidoOriginalHoy;
-        btnHoy.disabled = false;
         guardandoFondo = false;
         
         if (Object.keys(cambiosPendientes).length > 0) {
+            // Si el usuario hizo más clics mientras se guardaba, lanza la siguiente tanda.
             guardarCambiosPendientes();
         } else {
-            const timestamp = new Date().getTime();
-            fetch(SCRIPT_URL + "?mode=getData&t=" + timestamp, { cache: "no-store" })
-               .then(r => r.json())
-               .then(j => {
-              if (j.ok) {
-                headersSheet = j.headers;
-                rowsSheet = j.rows;
-                localStorage.setItem("comensales_cache_headers", JSON.stringify(headersSheet));
-                localStorage.setItem("comensales_cache_rows", JSON.stringify(rowsSheet));
-                renderizarVista();
-              }
-            });
+            // Terminó todo. NO hacemos GET para evitar que Google devuelva datos viejos.
+            btnHoy.innerHTML = "HOY";
+            btnHoy.disabled = false;
         }
 
       } catch (err) {
@@ -1482,7 +1483,7 @@
         btnHoy.innerHTML = `<span class="text-red-600 text-lg leading-none">⚠️</span>`;
         
         setTimeout(() => {
-           btnHoy.innerHTML = contenidoOriginalHoy;
+           btnHoy.innerHTML = "HOY";
            btnHoy.disabled = false;
            guardandoFondo = false;
         }, 3000);
